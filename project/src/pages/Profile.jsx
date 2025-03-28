@@ -1,34 +1,82 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { auth } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
 import { UserCircleIcon } from '@heroicons/react/24/outline';
+import axios from 'axios';
 
 function Profile() {
-const [profile, setProfile] = useState({
-  name: null,
-  email: null,
-  avatar: null,
-  bio: null,
-  location: null,
-  joinedDate: null
-});
-
-
-
-const [posts, setPosts] = useState([]);
-
-
+  const [userPosts, setUserPosts] = useState([]);
+  const [profile, setProfile] = useState({
+    name: '',
+    email: '',
+    avatar: '',
+    bio: '',
+    location: null,
+    joinedDate: null
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState(profile);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  const handleSaveProfile = () => {
-    setProfile(editedProfile);
-    setIsEditing(false);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await auth.getProfile();
+        setProfile(response.data);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setError('Failed to fetch profile.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserPosts = async () => {
+      try {
+        const response = await axios.get('/api/user/posts');
+        if (Array.isArray(response.data)) {
+            setUserPosts(response.data);
+        } else {
+            console.error('User posts response is not an array:', response.data);
+            setUserPosts([]); // Set to empty array if response is not valid
+        }
+      } catch (error) {
+        console.error('Error fetching user posts:', error);
+        console.error('Error fetching user posts:', error);
+        console.error('Error fetching user posts:', error);
+      }
+    };
+
+    fetchUserPosts();
+  }, []);
+
+  const handleSaveProfile = async () => {
+    try {
+      await auth.updateProfile(editedProfile);
+      setProfile(editedProfile);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      setError('Failed to save profile.');
+    }
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/');
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Profile Header */}
         <div className="bg-white shadow rounded-lg mb-6">
           <div className="px-4 py-5 sm:p-6">
             <div className="flex items-center space-x-6">
@@ -99,6 +147,12 @@ const [posts, setPosts] = useState([]);
                     >
                       Edit Profile
                     </button>
+                    <button
+                      onClick={handleLogout}
+                      className="mt-4 ml-4 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
+                    >
+                      Logout
+                    </button>
                   </>
                 )}
               </div>
@@ -106,12 +160,11 @@ const [posts, setPosts] = useState([]);
           </div>
         </div>
 
-        {/* User Posts */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-lg font-medium text-gray-900">Your Complaints</h3>
             <div className="mt-6 space-y-6">
-              {posts.map(post => (
+              {userPosts.map(post => (
                 <div key={post.id} className="border-b border-gray-200 pb-6">
                   <p className="text-gray-900">{post.content}</p>
                   {post.image && (

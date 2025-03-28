@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PhotoIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
 
 function CreatePost() {
   const navigate = useNavigate();
@@ -10,15 +11,19 @@ function CreatePost() {
     image: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.content.trim()) {
       toast.error('Please enter your complaint');
       return;
     }
-    // TODO: Implement post creation logic
-    toast.success('Complaint posted successfully!');
-    navigate('/user-dashboard');
+    try {
+      await axios.post('/api/posts', formData);
+      toast.success('Complaint posted successfully!');
+      navigate('/user-dashboard');
+    } catch (error) {
+      toast.error('Failed to post complaint. Please try again.');
+    }
   };
 
   return (

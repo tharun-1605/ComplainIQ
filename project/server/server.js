@@ -14,6 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 dotenv.config();
+console.log('MongoDB URI:', process.env.MONGODB_URI || 'Not defined');
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -67,6 +68,7 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/profile', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
+        console.log('User profile fetched:', user);
         res.json(user);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
@@ -89,9 +91,18 @@ app.post('/api/posts', auth, async (req, res) => {
     }
 });
 
-app.get('/api/posts', auth, async (req, res) => {
+app.get('/api/user/posts', auth, async (req, res) => {
     try {
         const posts = await Post.find().populate('author', 'username');
+        res.json(posts);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+app.get('/api/posts', auth, async (req, res) => {
+    try {
+        const posts = await Post.find({ author: req.user.id }).populate('author', 'username');
         res.json(posts);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });

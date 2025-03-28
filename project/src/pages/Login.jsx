@@ -5,18 +5,54 @@ import { toast } from 'react-hot-toast';
 function Login() {
   const [isAdmin, setIsAdmin] = useState(false);
 const [formData, setFormData] = useState({
-  email: null,
-  password: null,
+  email: '',
+  password: '',
 });
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement login logic
-    toast.success('Login successful!');
-    navigate(isAdmin ? '/admin-dashboard' : '/user-dashboard');
-  };
+    try {
+        const response = await fetch('http://localhost:5000/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: formData.email,
+                password: formData.password,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            localStorage.setItem('token', data.token);
+            // Fetch user details after successful login
+            const userResponse = await fetch('http://localhost:5000/api/profile', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${data.token}`,
+                },
+            });
+
+            const userData = await userResponse.json();
+            if (userResponse.ok) {
+                localStorage.setItem('user', JSON.stringify(userData));
+            } else {
+                toast.error(userData.message);
+            }
+            toast.success('Login successful!');
+            navigate(isAdmin ? '/admin-dashboard' : '/user-dashboard');
+        } else {
+            toast.error(data.message);
+        }
+    } catch (error) {
+        toast.error('An error occurred. Please try again.');
+    }
+};
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
