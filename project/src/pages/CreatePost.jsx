@@ -21,10 +21,13 @@ function CreatePost() {
     try {
       console.log('Token:', localStorage.getItem('token')); // Log the token
       const token = localStorage.getItem('token'); // Retrieve the token
-      await axios.post('http://localhost:5000/api/posts', formData, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Include the token in the headers
-        },
+      await axios.post('http://localhost:5000/api/posts', {
+        ...formData,
+        author: localStorage.getItem('userId'), // Include the user's ID
+      }, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the token in the headers
+          },
       });
       toast.success('Complaint posted successfully!');
       navigate('/user-dashboard');

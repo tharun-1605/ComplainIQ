@@ -39,6 +39,7 @@ app.post('/api/register', async (req, res) => {
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
         res.status(201).json({ token, user: { id: user._id, username, email, role: user.role } });
     } catch (error) {
+        console.error('Error creating post:', error); // Log the error for debugging
         res.status(500).json({ message: 'Server error' });
     }
 });
