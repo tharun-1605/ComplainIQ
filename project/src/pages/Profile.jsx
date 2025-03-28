@@ -37,8 +37,14 @@ function Profile() {
 
   useEffect(() => {
     const fetchUserPosts = async () => {
+        const token = localStorage.getItem('token'); // Get the token from local storage
       try {
-        const response = await axios.get('/api/user/posts');
+        console.log('Sending token:', token); // Log the token being sent
+        const response = await axios.get('http://localhost:5000/api/user/posts', {
+            headers: {
+                'Authorization': `Bearer ${token}` // Include the token in the Authorization header
+            }
+        });
         if (Array.isArray(response.data)) {
             setUserPosts(response.data);
         } else {

@@ -7,8 +7,9 @@ import axios from 'axios';
 function CreatePost() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    title: '',
     content: '',
-    image: ''
+    image: '',
   });
 
   const handleSubmit = async (e) => {
@@ -18,7 +19,13 @@ function CreatePost() {
       return;
     }
     try {
-      await axios.post('/api/posts', formData);
+      console.log('Token:', localStorage.getItem('token')); // Log the token
+      const token = localStorage.getItem('token'); // Retrieve the token
+      await axios.post('http://localhost:5000/api/posts', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token in the headers
+        },
+      });
       toast.success('Complaint posted successfully!');
       navigate('/user-dashboard');
     } catch (error) {
@@ -33,6 +40,22 @@ function CreatePost() {
           <div className="px-4 py-5 sm:p-6">
             <h2 className="text-lg font-medium text-gray-900">Create New Complaint</h2>
             <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                  Title
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="title"
+                    type="text"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="Enter title..."
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  />
+                </div>
+              </div>
+
               <div>
                 <label htmlFor="content" className="block text-sm font-medium text-gray-700">
                   Description
