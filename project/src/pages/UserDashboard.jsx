@@ -10,7 +10,7 @@ function UserDashboard() {
     const fetchPosts = async () => {
       const token = localStorage.getItem('token'); // Assuming the token is stored in local storage
       console.log('Token:', token); // Log the token for debugging
-      const response = await fetch('http://localhost:5000/api/posts', {
+      const response = await fetch('http://localhost:5000/api/user/posts', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

@@ -40,7 +40,7 @@ function Profile() {
         const token = localStorage.getItem('token'); // Get the token from local storage
       try {
         console.log('Sending token:', token); // Log the token being sent
-        const response = await axios.get('http://localhost:5000/api/user/posts', {
+        const response = await axios.get('http://localhost:5000/api/posts', {
             headers: {
                 'Authorization': `Bearer ${token}` // Include the token in the Authorization header
             }
