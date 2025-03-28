@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 
 const auth = (req, res, next) => {
     console.log('Received token:', req.header('Authorization')); // Log the received token
-    console.log('No authentication token found'); // Log if no token is found
+        console.log('No authentication token found'); // Log if no token is found
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         

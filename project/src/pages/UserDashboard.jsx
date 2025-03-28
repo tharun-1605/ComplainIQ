@@ -1,11 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { HeartIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 
 function UserDashboard() {
-const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState([]);
+  
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const token = localStorage.getItem('token'); // Assuming the token is stored in local storage
+      console.log('Token:', token); // Log the token for debugging
+      const response = await fetch('http://localhost:5000/api/posts', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('Response Status:', response.status); // Log the response status
+      const responseBody = await response.text(); // Get the response body as text
+      if (!response.ok) {
+        console.error('Failed to fetch posts:', response.statusText); // Log any errors
+        console.log('Response Status:', response.status); // Log the response status
+        console.log('Response Body:', responseBody); // Log the response body for debugging
+        return;
+      }
+      console.log('Response Body:', responseBody); // Log the response body for debugging
 
+      if (!response.ok) {
+        console.error('Failed to fetch posts:', response.statusText); // Log any errors
+        return;
+      }
+      
+      const data = JSON.parse(responseBody); // Parse the response body as JSON
+      setPosts(data);
+    };
+    fetchPosts();
+  }, []);
+  
+  const [comments, setComments] = useState({});
 
   const handleLike = (postId) => {
     setPosts(posts.map(post => {
@@ -17,6 +49,13 @@ const [posts, setPosts] = useState([]);
         };
       }
       return post;
+    }));
+  };
+
+  const handleCommentSubmit = (postId, comment) => {
+    setComments(prevComments => ({
+      ...prevComments,
+      [postId]: [...(prevComments[postId] || []), comment],
     }));
   };
 
@@ -50,13 +89,17 @@ const [posts, setPosts] = useState([]);
             <div key={post.id} className="bg-white shadow rounded-lg">
               {/* Post Header */}
               <div className="p-4 flex items-center space-x-3">
-                <img
-                  src={post.user.avatar}
-                  alt={post.user.name}
-                  className="h-10 w-10 rounded-full"
-                />
+                {post.user && post.user.avatar ? (
+                  <img
+                    src={post.user.avatar}
+                    alt={post.user.name}
+                    className="h-10 w-10 rounded-full"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-full bg-gray-300" /> // Placeholder for missing avatar
+                )}
                 <div>
-                  <p className="font-medium text-gray-900">{post.user.name}</p>
+                  <p className="font-medium text-gray-900">{post.user ? post.user.name : 'Unknown User'}</p>
                   <p className="text-sm text-gray-500">
                     {new Date(post.createdAt).toLocaleDateString()}
                   </p>
@@ -98,10 +141,32 @@ const [posts, setPosts] = useState([]);
                   )}
                   <span>{post.likes}</span>
                 </button>
-                <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-500">
+                <button 
+                  className="flex items-center space-x-2 text-gray-500 hover:text-blue-500"
+                >
                   <ChatBubbleLeftIcon className="h-6 w-6" />
                   <span>{post.comments}</span>
                 </button>
+              </div>
+
+              {/* Comment Input */}
+              <div className="px-4 py-2">
+                <input 
+                  type="text" 
+                  placeholder="Add a comment..." 
+                  className="border rounded p-2 w-full"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleCommentSubmit(post.id, e.target.value);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+                <div className="mt-2">
+                  {comments[post.id] && comments[post.id].map((comment, index) => (
+                    <p key={index} className="text-gray-600">{comment}</p>
+                  ))}
+                </div>
               </div>
             </div>
           ))}
