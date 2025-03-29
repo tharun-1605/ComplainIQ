@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { auth } from '../services/api';
 import { Link, useNavigate } from 'react-router-dom';
-import { UserCircleIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 
 function Profile() {
@@ -25,6 +24,7 @@ function Profile() {
       try {
         const response = await auth.getProfile();
         setProfile(response.data);
+        setEditedProfile(response.data);
       } catch (error) {
         console.error('Error fetching profile:', error);
         setError('Failed to fetch profile.');
@@ -37,23 +37,21 @@ function Profile() {
 
   useEffect(() => {
     const fetchUserPosts = async () => {
-        const token = localStorage.getItem('token'); // Get the token from local storage
+      const token = localStorage.getItem('token');
       try {
-        console.log('Sending token:', token); // Log the token being sent
+        console.log('Sending token:', token);
         const response = await axios.get('http://localhost:5000/api/posts', {
-            headers: {
-                'Authorization': `Bearer ${token}` // Include the token in the Authorization header
-            }
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
         if (Array.isArray(response.data)) {
-            setUserPosts(response.data);
+          setUserPosts(response.data);
         } else {
-            console.error('User posts response is not an array:', response.data);
-            setUserPosts([]); // Set to empty array if response is not valid
+          console.error('User posts response is not an array:', response.data);
+          setUserPosts([]);
         }
       } catch (error) {
-        console.error('Error fetching user posts:', error);
-        console.error('Error fetching user posts:', error);
         console.error('Error fetching user posts:', error);
       }
     };
@@ -166,36 +164,29 @@ function Profile() {
           </div>
         </div>
 
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium text-gray-900">Your Complaints</h3>
-            <div className="mt-6 space-y-6">
-              {userPosts.map(post => (
-                <div key={post.id} className="border-b border-gray-200 pb-6">
-                  <p className="text-gray-900">{post.content}</p>
-                  {post.image && (
-                    <img
-                      src={post.image}
-                      alt="Post"
-                      className="mt-2 h-48 w-full object-cover rounded-lg"
-                    />
-                  )}
-                  <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex space-x-4">
-                      <span>👍 {post.likes} likes</span>
-                      <span>💬 {post.comments} comments</span>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium
-                      ${post.status === 'Completed' ? 'bg-green-100 text-green-800' : 
-                        post.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' : 
-                        'bg-gray-100 text-gray-800'}`}>
-                      {post.status}
-                    </span>
+        {/* User Posts Section */}
+        <div className="mt-4">
+          <h2 className="text-2xl font-bold text-gray-900">User Posts</h2>
+          {userPosts.length > 0 ? (
+            userPosts.map((post) => (
+              <div key={post.id} className="border-b border-gray-200 pb-4 mb-4">
+                {post.image && <img src={post.image} alt={post.title} className="w-full h-auto" />}
+                <h3 className="text-lg font-semibold">{post.title}</h3>
+                <p className="text-gray-700">{post.body}</p>
+                <p className="text-sm text-gray-500">Likes: {post.likes}</p>
+                {post.comments && post.comments.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold">Comments:</h4>
+                    {post.comments.map((comment) => (
+                      <p key={comment.id} className="text-gray-600">- {comment.text}</p>
+                    ))}
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p>No posts available.</p>
+          )}
         </div>
       </div>
     </div>

@@ -36,14 +36,6 @@ function UserDashboard() {
         console.error('Post ID is undefined'); // Log error if postId is undefined
         return; // Exit the function if postId is not valid
     }
-    if (!postId) {
-        console.error('Post ID is undefined'); // Log error if postId is undefined
-        return; // Exit the function if postId is not valid
-    }
-    if (!postId) {
-        console.error('Post ID is undefined'); // Log error if postId is undefined
-        return; // Exit the function if postId is not valid
-    }
     console.log('Liking post with ID:', postId); // Debugging log to check postId
     try {
         const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, {
@@ -57,7 +49,7 @@ function UserDashboard() {
         }
         const updatedPost = await response.json();
         setPosts(posts.map(post => {
-            if (post.id === postId) {
+            if (post._id === postId) {
                 return {
                     ...post,
                     likes: updatedPost.likes,
@@ -139,29 +131,12 @@ function UserDashboard() {
                       {new Date(post.createdAt).toLocaleDateString()}
                     </p>
                   </div>
-                  <span className={`ml-auto px-3 py-1 rounded-full text-sm font-medium
-                    ${post.status === 'Completed' ? 'bg-green-100 text-green-800' : 
-                      post.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' : 
-                      'bg-gray-100 text-gray-800'}`}>
-                    {post.status}
-                  </span>
                 </div>
 
                 {/* Post Content */}
                 <div className="px-4 py-2">
                   <p className="text-gray-900">{post.content}</p>
                 </div>
-
-                {/* Post Image */}
-                {post.image && (
-                  <div className="aspect-w-16 aspect-h-9">
-                    <img
-                      src={post.image}
-                      alt="Post"
-                      className="w-full object-cover"
-                    />
-                  </div>
-                )}
 
                 {/* Post Actions */}
                 <div className="px-4 py-3 border-t border-gray-200 flex items-center space-x-6">
@@ -176,12 +151,6 @@ function UserDashboard() {
                     )}
                     <span>{post.likes}</span>
                   </button>
-                  <button 
-                    className="flex items-center space-x-2 text-gray-500 hover:text-blue-500"
-                  >
-                    <ChatBubbleLeftIcon className="h-6 w-6" />
-                    <span>{post.comments}</span>
-                  </button>
                 </div>
 
                 {/* Comment Input */}
@@ -193,12 +162,7 @@ function UserDashboard() {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         if (post._id) { 
-                        // Check if post ID is defined before submitting comment
-
-                        // Check if post ID is defined before submitting comment
-
-                        // Check if post ID is defined before submitting comment
-                          handleCommentSubmit(post.id, e.target.value);
+                          handleCommentSubmit(post._id, e.target.value);
                           e.target.value = ''; // Clear the input after submission
                         } else {
                           console.error('Post ID is undefined'); // Error handling for undefined post ID
@@ -206,11 +170,6 @@ function UserDashboard() {
                       }
                     }}
                   />
-                  <div className="mt-2">
-                    {comments[post.id] && comments[post.id].map((comment, index) => (
-                      <p key={index} className="text-gray-600">{comment}</p>
-                    ))} 
-                  </div>
                 </div>
               </div>
             ))
@@ -221,4 +180,4 @@ function UserDashboard() {
   );
 }
 
-export default UserDashboard; // Exporting the UserDashboard component
+export default UserDashboard;
