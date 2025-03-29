@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
+    likes: {
+        type: Number,
+        default: 0
+    },
     title: {
         type: String,
         required: true

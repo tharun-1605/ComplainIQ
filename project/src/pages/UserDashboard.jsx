@@ -15,48 +15,79 @@ function UserDashboard() {
           'Authorization': `Bearer ${token}`
         }
       });
+      const fetchedData = await response.json(); // Parse the response body as JSON
+      console.log('Fetched posts:', fetchedData); // Log the fetched posts for debugging
       
       console.log('Response Status:', response.status); // Log the response status
-      const responseBody = await response.text(); // Get the response body as text
       if (!response.ok) {
         console.error('Failed to fetch posts:', response.statusText); // Log any errors
-        console.log('Response Status:', response.status); // Log the response status
-        console.log('Response Body:', responseBody); // Log the response body for debugging
-        return;
-      }
-      console.log('Response Body:', responseBody); // Log the response body for debugging
-
-      if (!response.ok) {
-        console.error('Failed to fetch posts:', response.statusText); // Log any errors
-        return;
+        return; // Exit if the response is not ok
       }
       
-      const data = JSON.parse(responseBody); // Parse the response body as JSON
-      setPosts(data);
+      setPosts(fetchedData); // Set posts data
     };
     fetchPosts();
   }, []);
   
   const [comments, setComments] = useState({});
 
-  const handleLike = (postId) => {
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          likes: post.isLiked ? post.likes - 1 : post.likes + 1,
-          isLiked: !post.isLiked
-        };
-      }
-      return post;
-    }));
+  const handleLike = async (postId) => {
+    if (!postId) {
+        console.error('Post ID is undefined'); // Log error if postId is undefined
+        return; // Exit the function if postId is not valid
+    }
+    if (!postId) {
+        console.error('Post ID is undefined'); // Log error if postId is undefined
+        return; // Exit the function if postId is not valid
+    }
+    if (!postId) {
+        console.error('Post ID is undefined'); // Log error if postId is undefined
+        return; // Exit the function if postId is not valid
+    }
+    console.log('Liking post with ID:', postId); // Debugging log to check postId
+    try {
+        const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Failed to like post');
+        }
+        const updatedPost = await response.json();
+        setPosts(posts.map(post => {
+            if (post.id === postId) {
+                return {
+                    ...post,
+                    likes: updatedPost.likes,
+                    isLiked: !post.isLiked
+                };
+            }
+            return post;
+        }));
+    } catch (error) {
+        console.error('Error liking post:', error);
+    }
   };
 
-  const handleCommentSubmit = (postId, comment) => {
-    setComments(prevComments => ({
-      ...prevComments,
-      [postId]: [...(prevComments[postId] || []), comment],
-    }));
+  const handleCommentSubmit = async (postId, comment) => {
+    try {
+        await fetch(`http://localhost:5000/api/posts/${postId}/comment`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ comment })
+        });
+        setComments(prevComments => ({
+            ...prevComments,
+            [postId]: [...(prevComments[postId] || []), comment],
+        }));
+    } catch (error) {
+        console.error('Error adding comment:', error);
+    }
   };
 
   return (
@@ -85,95 +116,109 @@ function UserDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
-          {posts.map(post => (
-            <div key={post.id} className="bg-white shadow rounded-lg">
-              {/* Post Header */}
-              <div className="p-4 flex items-center space-x-3">
-                {post.user && post.user.avatar ? (
-                  <img
-                    src={post.user.avatar}
-                    alt={post.user.name}
-                    className="h-10 w-10 rounded-full"
-                  />
-                ) : (
-                  <div className="h-10 w-10 rounded-full bg-gray-300" /> // Placeholder for missing avatar
-                )}
-                <div>
-                  <p className="font-medium text-gray-900">{post.user ? post.user.name : 'Unknown User'}</p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(post.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <span className={`ml-auto px-3 py-1 rounded-full text-sm font-medium
-                  ${post.status === 'Completed' ? 'bg-green-100 text-green-800' : 
-                    post.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' : 
-                    'bg-gray-100 text-gray-800'}`}>
-                  {post.status}
-                </span>
-              </div>
+          {posts.length === 0 ? (
+            <p>No posts available.</p>
+          ) : (
+            posts.map(post => (
+                <div key={post._id} className="bg-white shadow rounded-lg">
 
-              {/* Post Content */}
-              <div className="px-4 py-2">
-                <p className="text-gray-900">{post.content}</p>
-              </div>
-
-              {/* Post Image */}
-              {post.image && (
-                <div className="aspect-w-16 aspect-h-9">
-                  <img
-                    src={post.image}
-                    alt="Post"
-                    className="w-full object-cover"
-                  />
-                </div>
-              )}
-
-              {/* Post Actions */}
-              <div className="px-4 py-3 border-t border-gray-200 flex items-center space-x-6">
-                <button
-                  onClick={() => handleLike(post.id)}
-                  className="flex items-center space-x-2 text-gray-500 hover:text-red-500"
-                >
-                  {post.isLiked ? (
-                    <HeartSolidIcon className="h-6 w-6 text-red-500" />
+                {/* Post Header */}
+                <div className="p-4 flex items-center space-x-3">
+                  {post.user && post.user.avatar ? (
+                    <img
+                      src={post.user.avatar}
+                      alt={post.user.name}
+                      className="h-10 w-10 rounded-full"
+                    />
                   ) : (
-                    <HeartIcon className="h-6 w-6" />
+                    <div className="h-10 w-10 rounded-full bg-gray-300" /> // Placeholder for missing avatar
                   )}
-                  <span>{post.likes}</span>
-                </button>
-                <button 
-                  className="flex items-center space-x-2 text-gray-500 hover:text-blue-500"
-                >
-                  <ChatBubbleLeftIcon className="h-6 w-6" />
-                  <span>{post.comments}</span>
-                </button>
-              </div>
+                  <div>
+                    <p className="font-medium text-gray-900">{post.user ? post.user.name : 'Unknown User'}</p>
+                    <p className="text-sm text-gray-500">
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <span className={`ml-auto px-3 py-1 rounded-full text-sm font-medium
+                    ${post.status === 'Completed' ? 'bg-green-100 text-green-800' : 
+                      post.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' : 
+                      'bg-gray-100 text-gray-800'}`}>
+                    {post.status}
+                  </span>
+                </div>
 
-              {/* Comment Input */}
-              <div className="px-4 py-2">
-                <input 
-                  type="text" 
-                  placeholder="Add a comment..." 
-                  className="border rounded p-2 w-full"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCommentSubmit(post.id, e.target.value);
-                      e.target.value = '';
-                    }
-                  }}
-                />
-                <div className="mt-2">
-                  {comments[post.id] && comments[post.id].map((comment, index) => (
-                    <p key={index} className="text-gray-600">{comment}</p>
-                  ))}
+                {/* Post Content */}
+                <div className="px-4 py-2">
+                  <p className="text-gray-900">{post.content}</p>
+                </div>
+
+                {/* Post Image */}
+                {post.image && (
+                  <div className="aspect-w-16 aspect-h-9">
+                    <img
+                      src={post.image}
+                      alt="Post"
+                      className="w-full object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Post Actions */}
+                <div className="px-4 py-3 border-t border-gray-200 flex items-center space-x-6">
+                  <button
+                    onClick={() => handleLike(post._id)}
+                    className="flex items-center space-x-2 text-gray-500 hover:text-red-500"
+                  >
+                    {post.isLiked ? (
+                      <HeartSolidIcon className="h-6 w-6 text-red-500" />
+                    ) : (
+                      <HeartIcon className="h-6 w-6" />
+                    )}
+                    <span>{post.likes}</span>
+                  </button>
+                  <button 
+                    className="flex items-center space-x-2 text-gray-500 hover:text-blue-500"
+                  >
+                    <ChatBubbleLeftIcon className="h-6 w-6" />
+                    <span>{post.comments}</span>
+                  </button>
+                </div>
+
+                {/* Comment Input */}
+                <div className="px-4 py-2">
+                  <input 
+                    type="text" 
+                    placeholder="Add a comment..." 
+                    className="border rounded p-2 w-full"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        if (post._id) { 
+                        // Check if post ID is defined before submitting comment
+
+                        // Check if post ID is defined before submitting comment
+
+                        // Check if post ID is defined before submitting comment
+                          handleCommentSubmit(post.id, e.target.value);
+                          e.target.value = ''; // Clear the input after submission
+                        } else {
+                          console.error('Post ID is undefined'); // Error handling for undefined post ID
+                        }
+                      }
+                    }}
+                  />
+                  <div className="mt-2">
+                    {comments[post.id] && comments[post.id].map((comment, index) => (
+                      <p key={index} className="text-gray-600">{comment}</p>
+                    ))} 
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </main>
     </div>
   );
 }
 
-export default UserDashboard;
+export default UserDashboard; // Exporting the UserDashboard component

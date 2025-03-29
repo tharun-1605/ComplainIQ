@@ -110,5 +110,25 @@ app.get('/api/posts', auth, async (req, res) => {
     }
 });
 
+app.post('/api/posts/:postId/like', auth, async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const post = await Post.findById(postId);
+        
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        // Increment the like count
+        post.likes += 1;
+        await post.save();
+
+        res.status(200).json(post);
+    } catch (error) {
+        console.error('Error liking post:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
