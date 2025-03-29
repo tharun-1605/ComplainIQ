@@ -91,8 +91,7 @@ function CreatePost() {
                     onChange={(e) => {
                       const file = e.target.files[0];
                       if (file) {
-                        const fileURL = URL.createObjectURL(file);
-                        setFormData({ ...formData, image: fileURL });
+                        setFormData({ ...formData, image: file }); // Store the actual file object
                       }
                     }}
                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"

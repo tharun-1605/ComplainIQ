@@ -94,9 +94,11 @@ app.post('/api/posts', upload.single('image'), auth, async (req, res) => {
     try {
         const { title, content } = req.body;
         const post = new Post({
+            image: req.file ? req.file.path : null, // Include image URL if available
             title,
             content,
-            author: req.user.id
+            author: req.user.id,
+            image: req.file ? req.file.path : null // Include image URL if available
         });
         await post.save();
         res.status(201).json(post);
