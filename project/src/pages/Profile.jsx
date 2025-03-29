@@ -86,13 +86,19 @@ function Profile() {
             <div className="flex items-center space-x-6">
               <div className="flex-shrink-0">
                 {isEditing ? (
-                  <input
-                    type="text"
-                    value={editedProfile.avatar}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, avatar: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="Avatar URL"
-                  />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const fileURL = URL.createObjectURL(file);
+                          setEditedProfile({ ...editedProfile, avatar: fileURL });
+                        }
+                      }}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+
                 ) : (
                   <img
                     src={profile.avatar}

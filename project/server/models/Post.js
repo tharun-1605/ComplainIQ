@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
+    image: {
+        type: String,
+        required: false
+    },
     comments: [{
         text: {
             type: String,

@@ -135,6 +135,9 @@ function UserDashboard() {
 
                 {/* Post Content */}
                 <div className="px-4 py-2">
+                  {post.image && (
+                    <img src={post.image} alt="Post Image" className="w-full h-auto rounded-md" />
+                  )}
                   <p className="text-gray-900">{post.content}</p>
                 </div>
 

@@ -32,7 +32,7 @@ app.post('/api/register', async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await brypt.hash(password, 10);
         const user = new User({ username, email, password: hashedPassword });
         await user.save();
 
@@ -76,7 +76,20 @@ app.get('/api/profile', auth, async (req, res) => {
     }
 });
 
-app.post('/api/posts', auth, async (req, res) => {
+import multer from 'multer';
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Specify the directory to save uploaded files
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname); // Append timestamp to the filename
+  }
+});
+
+const upload = multer({ storage });
+
+app.post('/api/posts', upload.single('image'), auth, async (req, res) => {
     // Add comments to the post
     try {
         const { title, content } = req.body;

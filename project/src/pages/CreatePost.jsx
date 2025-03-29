@@ -19,15 +19,19 @@ function CreatePost() {
       return;
     }
     try {
-      console.log('Token:', localStorage.getItem('token')); // Log the token
       const token = localStorage.getItem('token'); // Retrieve the token
-      await axios.post('http://localhost:5000/api/posts', {
-        ...formData,
-        author: localStorage.getItem('userId'), // Include the user's ID
-      }, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include the token in the headers
-          },
+      console.log('Token:', token); // Log the token to verify its value
+
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('content', formData.content);
+      if (formData.image) {
+        formDataToSend.append('image', formData.image);
+      }
+      await axios.post('http://localhost:5000/api/posts', formDataToSend, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token in the headers
+        },
       });
       toast.success('Complaint posted successfully!');
       navigate('/user-dashboard');
@@ -77,16 +81,21 @@ function CreatePost() {
 
               <div>
                 <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-                  Image URL (Optional)
+                  Upload Image (Optional)
                 </label>
                 <div className="mt-1">
                   <input
-                    type="text"
+                    type="file"
                     id="image"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const fileURL = URL.createObjectURL(file);
+                        setFormData({ ...formData, image: fileURL });
+                      }
+                    }}
                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="Enter image URL"
-                    value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                   />
                 </div>
               </div>
