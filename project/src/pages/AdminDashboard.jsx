@@ -7,6 +7,7 @@ function AdminDashboard() {
   const [posts, setPosts] = useState([]);
   const [complaints, setComplaints] = useState([]);
   const [user, setUser] = useState(null);
+  const [expandedComments, setExpandedComments] = useState({}); // Track expanded comments
 
   const fetchUserProfile = async () => {
     try {
@@ -46,31 +47,26 @@ function AdminDashboard() {
     fetchUserProfile();
   }, []);
 
-const handleStatusChange = async (complaintId, newStatus) => {
-  try {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost:5000/api/user/complaints/${complaintId}/status`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ status: newStatus })
-    });
-    
-    setComplaints(prevComplaints =>
-      prevComplaints.map(complaint =>
-        complaint._id === complaintId ? { ...complaint, status: newStatus } : complaint
-      )
-    );
-  } catch (error) {
-    console.error('Failed to update status:', error.message);
-  }
-    setComplaints(prevComplaints =>
-      prevComplaints.map(complaint =>
-        complaint._id === complaintId ? { ...complaint, status: newStatus } : complaint
-      )
-    );
+  const handleStatusChange = async (complaintId, newStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`http://localhost:5000/api/user/complaints/${complaintId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      
+      setComplaints(prevComplaints =>
+        prevComplaints.map(complaint =>
+          complaint._id === complaintId ? { ...complaint, status: newStatus } : complaint
+        )
+      );
+    } catch (error) {
+      console.error('Failed to update status:', error.message);
+    }
   };
 
   const handlePriorityChange = (complaintId, newPriority) => {
@@ -79,6 +75,13 @@ const handleStatusChange = async (complaintId, newStatus) => {
         complaint._id === complaintId ? { ...complaint, priority: newPriority } : complaint
       )
     );
+  };
+
+  const toggleComments = (complaintId) => {
+    setExpandedComments(prev => ({
+      ...prev,
+      [complaintId]: !prev[complaintId]
+    }));
   };
 
   const sortedComplaints = [...complaints].sort((a, b) => b.likes - a.likes);
@@ -187,7 +190,22 @@ const handleStatusChange = async (complaintId, newStatus) => {
                   <div className="mt-4 flex items-center text-sm text-gray-500">
                     <span className="mr-4">👍 {complaint.likes} likes</span>
                     <span>💬 {complaint.comments.length} comments</span>
+                    <button onClick={() => toggleComments(complaint._id)} className="ml-4 text-blue-500">
+                      {expandedComments[complaint._id] ? 'Hide Comments' : 'Show Comments'}
+                    </button>
                   </div>
+                  {expandedComments[complaint._id] && (
+                    <div className="mt-2">
+                      <h3 className="font-medium text-gray-900">Comments:</h3>
+                      <ul className="divide-y divide-gray-200">
+                        {complaint.comments.map((comment, index) => (
+                          <li key={index} className="py-2">
+                            <p className="text-gray-800">{comment.text}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
