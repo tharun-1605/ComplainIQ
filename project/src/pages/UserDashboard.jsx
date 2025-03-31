@@ -5,80 +5,87 @@ import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 
 function UserDashboard() {
   const [posts, setPosts] = useState([]);
-  
+  const [comments, setComments] = useState({});
+  const [error, setError] = useState(null); // State for error handling
+
   useEffect(() => {
     const fetchPosts = async () => {
-      const token = localStorage.getItem('token'); // Assuming the token is stored in local storage
-      console.log('Token:', token); // Log the token for debugging
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('No token found. Please log in.'); // Handle missing token
+        return;
+      }
       const response = await fetch('http://localhost:5000/api/user/posts', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      const fetchedData = await response.json(); // Parse the response body as JSON
-      console.log('Fetched posts:', fetchedData); // Log the fetched posts for debugging
-      
-      console.log('Response Status:', response.status); // Log the response status
       if (!response.ok) {
-        console.error('Failed to fetch posts:', response.statusText); // Log any errors
-        return; // Exit if the response is not ok
+        setError('Failed to fetch posts.'); // User-friendly error message
+        return;
       }
-      
-      setPosts(fetchedData); // Set posts data
+      const fetchedData = await response.json();
+      setPosts(fetchedData);
     };
     fetchPosts();
   }, []);
-  
-  const [comments, setComments] = useState({});
 
   const handleLike = async (postId) => {
     if (!postId) {
-        console.error('Post ID is undefined'); // Log error if postId is undefined
-        return; // Exit the function if postId is not valid
+      console.error('Post ID is undefined');
+      return;
     }
-    console.log('Liking post with ID:', postId); // Debugging log to check postId
     try {
-        const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        if (!response.ok) {
-            throw new Error('Failed to like post');
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
-        const updatedPost = await response.json();
-        setPosts(posts.map(post => {
-            if (post._id === postId) {
-                return {
-                    ...post,
-                    likes: updatedPost.likes,
-                    isLiked: !post.isLiked
-                };
-            }
-            return post;
-        }));
+      });
+      if (!response.ok) {
+        throw new Error('Failed to like post');
+      }
+      const updatedPost = await response.json();
+      setPosts(posts.map(post => {
+        if (post._id === postId) {
+          return {
+            ...post,
+            likes: updatedPost.likes,
+            isLiked: !post.isLiked
+          };
+        }
+        return post;
+      }));
     } catch (error) {
-        console.error('Error liking post:', error);
+      console.error('Error liking post:', error);
     }
   };
 
   const handleCommentSubmit = async (postId, comment) => {
+    if (!comment.trim()) {
+      console.error('Comment cannot be empty'); // Validate comment
+      return;
+    }
     try {
-        await fetch(`http://localhost:5000/api/posts/${postId}/comment`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ comment })
-        });
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/comment`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ comment })
+      });
+      if (response.ok) {
         setComments(prevComments => ({
-            ...prevComments,
-            [postId]: [...(prevComments[postId] || []), comment],
+          ...prevComments,
+          [postId]: [...(prevComments[postId] || []), comment],
         }));
+      } else {
+        const errorData = await response.json();
+        console.error('Error adding comment:', errorData.message);
+      }
     } catch (error) {
-        console.error('Error adding comment:', error);
+      console.error('Error adding comment:', error);
     }
   };
 
@@ -107,13 +114,13 @@ function UserDashboard() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {error && <p className="text-red-500">{error}</p>} {/* Display error message */}
         <div className="space-y-6">
           {posts.length === 0 ? (
             <p>No posts available.</p>
           ) : (
             posts.map(post => (
-                <div key={post._id} className="bg-white shadow rounded-lg">
-
+              <div key={post._id} className="bg-white shadow rounded-lg">
                 {/* Post Header */}
                 <div className="p-4 flex items-center space-x-3">
                   {post.user && post.user.avatar ? (
@@ -123,7 +130,7 @@ function UserDashboard() {
                       className="h-10 w-10 rounded-full"
                     />
                   ) : (
-                    <div className="h-10 w-10 rounded-full bg-gray-300" /> // Placeholder for missing avatar
+                    <div className="h-10 w-10 rounded-full bg-gray-300" />
                   )}
                   <div>
                     <p className="font-medium text-gray-900">{post.user ? post.user.name : 'Unknown User'}</p>
@@ -168,7 +175,7 @@ function UserDashboard() {
                           handleCommentSubmit(post._id, e.target.value);
                           e.target.value = ''; // Clear the input after submission
                         } else {
-                          console.error('Post ID is undefined'); // Error handling for undefined post ID
+                          console.error('Post ID is undefined');
                         }
                       }
                     }}
