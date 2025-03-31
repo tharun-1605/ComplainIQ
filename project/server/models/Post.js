@@ -35,7 +35,7 @@ const postSchema = new mongoose.Schema({
     },
     status: { // Adding status field
         type: String,
-        enum: ['Pending', 'Resolved', 'Rejected'], // Possible statuses
+enum: ['Pending', 'Resolved', 'Rejected', 'Completed'], // Possible statuses
         default: 'Pending' // Default status
     }
 }, { timestamps: true });
