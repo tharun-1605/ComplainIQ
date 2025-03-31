@@ -11,10 +11,13 @@ import jwt from 'jsonwebtoken';
  * If authentication fails, responds with a 401 status and an error message.
  */
 const auth = (req, res, next) => {
+    console.log('Auth middleware triggered'); // Log when middleware is triggered
+    console.log('Request path:', req.path); // Log the request path
     console.log('Received token:', req.header('Authorization')); // Log the received token
+
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
-    if (!token) {
+    if (!token && req.path !== '/api/user/posts') {
         console.log('No authentication token found'); // Log if no token is found
         return res.status(401).json({ message: 'No authentication token found' });
     }

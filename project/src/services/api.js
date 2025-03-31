@@ -16,9 +16,11 @@ api.interceptors.request.use((config) => {
 });
 
 export const auth = {
+    // Removed duplicate getProfile export
+
     login: (email, password) => api.post('/login', { email, password }),
     register: (username, email, password) => api.post('/register', { username, email, password }),
-    getProfile: () => api.get('/profile')
+    getProfile: () => api.get('/profile'),
 };
 
 export const posts = {

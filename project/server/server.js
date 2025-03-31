@@ -32,7 +32,7 @@ app.post('/api/register', async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const hashedPassword = await brypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({ username, email, password: hashedPassword });
         await user.save();
 
@@ -98,7 +98,6 @@ app.post('/api/posts', upload.single('image'), auth, async (req, res) => {
             title,
             content,
             author: req.user.id,
-            image: req.file ? req.file.path : null // Include image URL if available
         });
         await post.save();
         res.status(201).json(post);
@@ -107,9 +106,10 @@ app.post('/api/posts', upload.single('image'), auth, async (req, res) => {
     }
 });
 
-app.get('/api/user/posts', auth, async (req, res) => {
+app.get('/api/user/posts', async (req, res) => {
     try {
-        const posts = await Post.find().populate('author', 'username');
+        const posts = await Post.find().populate('author', 'username').populate('comments.author', 'username');
+        console.log('Posts retrieved:', posts); // Log the retrieved posts
         res.status(200).json(posts);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
