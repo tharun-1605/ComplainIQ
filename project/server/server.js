@@ -164,5 +164,27 @@ app.post('/api/posts/:postId/comment', auth, async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 5000; 
+app.put('/api/user/complaints/:complaintId/status', auth, async (req, res) => {
+    console.log('Received PUT request for complaint ID:', req.params.complaintId);
+    console.log('Request body:', req.body);
+    console.log('User ID:', req.user.id); // Log the authenticated user ID
+    console.log('Received PUT request for complaint ID:', req.params.complaintId);
+    console.log('Request body:', req.body);
+    try {
+        const { complaintId } = req.params;
+        const { status } = req.body;
+
+        const updatedComplaint = await Post.updateStatus(complaintId, status);
+        if (!updatedComplaint) {
+            return res.status(404).json({ message: 'Complaint not found' });
+        }
+
+        res.status(200).json(updatedComplaint);
+    } catch (error) {
+        console.error('Error updating complaint status:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

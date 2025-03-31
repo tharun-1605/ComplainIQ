@@ -32,7 +32,16 @@ const postSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    status: { // Adding status field
+        type: String,
+        enum: ['Pending', 'Resolved', 'Rejected'], // Possible statuses
+        default: 'Pending' // Default status
     }
 }, { timestamps: true });
+
+postSchema.statics.updateStatus = async function(complaintId, newStatus) {
+    return await this.findByIdAndUpdate(complaintId, { status: newStatus }, { new: true });
+};
 
 export default mongoose.model('Post', postSchema);

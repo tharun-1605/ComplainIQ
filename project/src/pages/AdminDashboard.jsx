@@ -46,7 +46,26 @@ function AdminDashboard() {
     fetchUserProfile();
   }, []);
 
-  const handleStatusChange = (complaintId, newStatus) => {
+const handleStatusChange = async (complaintId, newStatus) => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`http://localhost:5000/api/user/complaints/${complaintId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+    
+    setComplaints(prevComplaints =>
+      prevComplaints.map(complaint =>
+        complaint._id === complaintId ? { ...complaint, status: newStatus } : complaint
+      )
+    );
+  } catch (error) {
+    console.error('Failed to update status:', error.message);
+  }
     setComplaints(prevComplaints =>
       prevComplaints.map(complaint =>
         complaint._id === complaintId ? { ...complaint, status: newStatus } : complaint
