@@ -118,7 +118,9 @@ app.get('/api/user/posts', async (req, res) => {
 
 app.get('/api/posts', auth, async (req, res) => {
     try {
-        const posts = await Post.find({ author: req.user.id }).populate('author', 'username');
+        const posts = await Post.find({ author: req.user.id })
+            .populate('author', 'username')
+            .populate('comments.author', 'username'); // Populate comments to include author information
         res.json(posts);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });

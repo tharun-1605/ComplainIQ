@@ -94,7 +94,7 @@ function AdminDashboard() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-2xl mx-auto mt-16 space-y-6 px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
@@ -178,14 +178,12 @@ function AdminDashboard() {
                     </div>
                   </div>
                   <div className="mt-4">
-                    <p className="text-gray-900">{complaint.content}</p>
-                    {complaint.image && (
-                      <img
-                        src={complaint.image}
-                        alt="Complaint"
-                        className="mt-2 h-48 w-full object-cover rounded-lg"
-                      />
-                    )}
+                    <img
+                      src={complaint.image}
+                      alt="Complaint"
+                      className="w-100% h-100% flex justify-center items-center overflow-hidden"
+                    />
+                    <p className="text-gray-900 mt-2">{complaint.content}</p>
                   </div>
                   <div className="mt-4 flex items-center text-sm text-gray-500">
                     <span className="mr-4">👍 {complaint.likes} likes</span>

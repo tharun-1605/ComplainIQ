@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { HeartIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
+import { HeartIcon, ChatBubbleLeftIcon, HomeIcon, PlusCircleIcon, UserIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 
 function UserDashboard() {
@@ -60,15 +60,11 @@ function UserDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <header className="bg-white shadow fixed top-0 w-full z-10 p-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-900">Public Complaints</h1>
-        <div className="flex items-center space-x-4">
-          <Link to="/create-post" className="text-white bg-blue-600 px-4 py-2 rounded-md shadow">Create Post</Link>
-          <Link to="/profile" className="text-gray-700 bg-gray-200 px-4 py-2 rounded-md shadow">Profile</Link>
-        </div>
+    <div className="min-h-screen bg-gray-100 p-4 flex flex-col justify-between">
+      <header className="bg-white shadow p-4 text-center text-2xl font-bold text-gray-900">
+        Public Complaints
       </header>
-      <main className="max-w-2xl mx-auto mt-16 space-y-6">
+      <main className="max-w-2xl mx-auto mt-4 space-y-6 flex-1">
         {error && <p className="text-red-500">{error}</p>}
         {posts.length === 0 ? <p className="text-center text-gray-500">No posts available.</p> : posts.map(post => (
           <div key={post._id} className="bg-white shadow rounded-lg overflow-hidden">
@@ -100,6 +96,11 @@ function UserDashboard() {
           </div>
         ))}
       </main>
+      <footer className="bg-white shadow p-4 fixed bottom-0 left-0 w-full flex justify-around">
+        <Link to="/" className="text-gray-700 hover:text-blue-500"><HomeIcon className="h-6 w-6" /></Link>
+        <Link to="/create-post" className="text-gray-700 hover:text-blue-500"><PlusCircleIcon className="h-6 w-6" /></Link>
+        <Link to="/profile" className="text-gray-700 hover:text-blue-500"><UserIcon className="h-6 w-6" /></Link>
+      </footer>
     </div>
   );
 }
