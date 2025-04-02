@@ -39,7 +39,6 @@ function Profile() {
     const fetchUserPosts = async () => {
       const token = localStorage.getItem('token');
       try {
-        console.log('Sending token:', token);
         const response = await axios.get('http://localhost:5000/api/posts', {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -48,14 +47,12 @@ function Profile() {
         if (Array.isArray(response.data)) {
           setUserPosts(response.data);
         } else {
-          console.error('User posts response is not an array:', response.data);
           setUserPosts([]);
         }
       } catch (error) {
         console.error('Error fetching user posts:', error);
       }
     };
-
     fetchUserPosts();
   }, []);
 
@@ -65,7 +62,6 @@ function Profile() {
       setProfile(editedProfile);
       setIsEditing(false);
     } catch (error) {
-      console.error('Error saving profile:', error);
       setError('Failed to save profile.');
     }
   };
@@ -79,115 +75,33 @@ function Profile() {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white shadow rounded-lg mb-6">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center space-x-6">
-              <div className="flex-shrink-0">
-                {isEditing ? (
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const fileURL = URL.createObjectURL(file);
-                          setEditedProfile({ ...editedProfile, avatar: fileURL });
-                        }
-                      }}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-
-                ) : (
-                  <img
-                    src={profile.avatar}
-                    alt={profile.name}
-                    className="h-24 w-24 rounded-full"
-                  />
-                )}
-              </div>
-              <div className="flex-1">
-                {isEditing ? (
-                  <div className="space-y-4">
-                    <input
-                      type="text"
-                      value={editedProfile.name}
-                      onChange={(e) => setEditedProfile({ ...editedProfile, name: e.target.value })}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Name"
-                    />
-                    <input
-                      type="email"
-                      value={editedProfile.email}
-                      onChange={(e) => setEditedProfile({ ...editedProfile, email: e.target.value })}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Email"
-                    />
-                    <textarea
-                      value={editedProfile.bio}
-                      onChange={(e) => setEditedProfile({ ...editedProfile, bio: e.target.value })}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      placeholder="Bio"
-                      rows={3}
-                    />
-                    <div className="flex justify-end space-x-3">
-                      <button
-                        onClick={() => setIsEditing(false)}
-                        className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleSaveProfile}
-                        className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <h2 className="text-2xl font-bold text-gray-900">{profile.name}</h2>
-                    <p className="text-sm text-gray-500">{profile.email}</p>
-                    <p className="mt-2 text-gray-700">{profile.bio}</p>
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="mt-4 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                    >
-                      Edit Profile
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="mt-4 ml-4 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
-                    >
-                      Logout
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center">
+      <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-6 mt-10">
+        <div className="flex flex-col items-center">
+          <div className="relative">
+            <img
+              src={profile.avatar}
+              alt="Avatar"
+              className="w-28 h-28 rounded-full border-4 border-pink-500"
+            />
+          </div>
+          <h2 className="text-2xl font-semibold mt-3">{profile.name}</h2>
+          <p className="text-gray-500">{profile.email}</p>
+          <p className="text-gray-700 mt-2">{profile.bio}</p>
+          <div className="flex space-x-4 mt-4">
+            <button onClick={() => setIsEditing(true)} className="px-4 py-2 text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600">Edit Profile</button>
+            <button onClick={handleLogout} className="px-4 py-2 text-white bg-red-500 rounded-lg shadow-md hover:bg-red-600">Logout</button>
           </div>
         </div>
+      </div>
 
-        {/* User Posts Section */}
-        <div className="mt-4">
-          <h2 className="text-2xl font-bold text-gray-900">User Posts</h2>
+      <div className="w-full max-w-4xl mt-6">
+        <h2 className="text-xl font-semibold mb-4">Posts</h2>
+        <div className="grid grid-cols-3 gap-2">
           {userPosts.length > 0 ? (
             userPosts.map((post) => (
-              <div key={post.id} className="border-b border-gray-200 pb-4 mb-4">
-                {post.image && <img src={post.image} alt={post.title} className="w-full h-auto" />}
-                <h3 className="text-lg font-semibold">{post.title}</h3>
-                <p className="text-gray-700">{post.body}</p>
-                <p className="text-sm text-gray-500">Likes: {post.likes}</p>
-                {post.comments && post.comments.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold">Comments:</h4>
-                    {post.comments.map((comment) => (
-                      <p key={comment.id} className="text-gray-600">- {comment.text}</p>
-                    ))}
-                  </div>
-                )}
+              <div key={post.id} className="w-full aspect-square bg-gray-300 rounded-lg overflow-hidden">
+                {post.image && <img src={post.image} alt={post.title} className="w-full h-full object-cover" />}
               </div>
             ))
           ) : (
