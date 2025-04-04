@@ -87,7 +87,10 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 } // Limit file size to 5MB
+});
 
 app.post('/api/posts', upload.single('image'), auth, async (req, res) => {
     // Add comments to the post

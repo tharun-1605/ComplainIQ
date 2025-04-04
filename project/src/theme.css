@@ -1,0 +1,40 @@
+:root {
+  --bg-color-light: #f9fafb; /* Light background */
+  --text-color-light: #111827; /* Dark text */
+  --bg-color-dark: #111827; /* Dark background */
+  --text-color-dark: #f9fafb; /* Light text */
+}
+
+body.light {
+  background-color: var(--bg-color-light);
+  color: var(--text-color-light);
+}
+
+body.dark {
+  background-color: var(--bg-color-dark);
+  color: var(--text-color-dark);
+}
+
+/* Additional styles for dark theme */
+.bg-gray-900 {
+  background-color: var(--bg-color-dark); /* Dark background */
+}
+
+.text-gray-50 {
+  color: var(--text-color-dark); /* Light text */
+}
+
+.text-gray-900 {
+  color: var(--text-color-light); /* Dark text */
+}
+
+/* Update other UI elements for dark theme */
+.header {
+  background-color: var(--bg-color-dark);
+  color: var(--text-color-dark);
+}
+
+.footer {
+  background-color: var(--bg-color-dark);
+  color: var(--text-color-dark);
+}

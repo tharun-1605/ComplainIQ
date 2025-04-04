@@ -57,7 +57,7 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 px-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-greay-600 px-6">
       <div className="bg-white bg-opacity-20 backdrop-blur-lg shadow-2xl rounded-2xl p-8 max-w-md w-full transition-all transform hover:scale-105">
         <h2 className="text-center text-3xl font-extrabold text-white animate-fade-in">Welcome Back</h2>
         <p className="text-center text-white mb-6">Sign in to your account</p>
@@ -120,9 +120,9 @@ function Login() {
           </button>
         </form>
 
-        <p className="text-center text-white mt-4">
+        <p className="text-center text-black mt-4">
           Don't have an account?{' '}
-          <Link to="/register" className="text-blue-200 font-semibold hover:underline transition-all">
+          <Link to="/register" className="text-black-200 font-semibold hover:underline transition-all">
             Register
           </Link>
         </p>

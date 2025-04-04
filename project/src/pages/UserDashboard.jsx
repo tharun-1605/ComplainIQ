@@ -12,6 +12,7 @@ import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import clsx from 'clsx';
 
 function UserDashboard() {
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -97,14 +98,24 @@ function UserDashboard() {
       [commentId]: !prev[commentId],
     }));
   };
+  const handleThemeToggle = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.body.className = newTheme; // Update body class for theme
+};
+useEffect(() => {
+  document.body.className = theme; // Set body class on theme change
+}, [theme]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between pt-4 pb-20 relative">
-      <header className="bg-white shadow p-5 text-xl font-bold text-center sticky top-0 z-10">
-        🛠️ Public Complaints
-      </header>
+    <div className="min-h-screen bg-black-100 flex flex-col justify-between pt-4 pb-20 relative">
+    {/* <div className="min-h-screen bg-gray-50 flex flex-col justify-between pt-4 pb-20 relative"> */}
+    <header className="bg-black p-5 text-xl font-bold text-center sticky top-0 z-10">
+             Public Complaints
+        </header>
 
-      <main className="flex-1 max-w-xl mx-auto w-full p-4 space-y-6">
+      <main className="flex-1 max-w-xl mx-auto w-full p-4 space-y-6 bg-black-100">
         {error && <p className="text-red-500 text-center">{error}</p>}
         {loading ? (
           <p className="text-center text-gray-500">Loading posts...</p>
@@ -114,7 +125,7 @@ function UserDashboard() {
           posts.map((post) => (
             <div
               key={post._id}
-              className="bg-white rounded-xl shadow-sm hover:shadow-md transition duration-200"
+              className="bg-black rounded-xl shadow-sm hover:shadow-md transition duration-200"
             >
               <div className="flex items-center gap-3 p-3">
                 <img
@@ -122,9 +133,10 @@ function UserDashboard() {
                   alt={post.user?.name}
                   className="w-10 h-10 rounded-full object-cover border"
                 />
-                <div>
-                  <p className="font-semibold text-gray-800">{post.user?.name || 'Unknown'}</p>
-                  <p className="text-xs text-gray-500">{new Date(post.createdAt).toLocaleString()}</p>
+                <div className="flex flex-col items-start">
+                  <p className="font-semibold text-white-800">{post.user?.name || 'Unknown'}</p>
+                  <p className="text-xs text-white-500">{new Date(post.createdAt).toLocaleString()}</p>
+<p className="text-xs text-white-500">Status: {post.status} | Likes: {post.likes} | Comments: {post.comments?.length || 0}</p>
                 </div>
               </div>
 
@@ -143,12 +155,12 @@ function UserDashboard() {
               )}
 
               <div className="p-4 space-y-3">
-                <p className="text-sm text-gray-800">{post.content}</p>
+                <p className="text-sm text-white-800">{post.content}</p>
 
                 <div className="flex items-center justify-between">
                   <button
                     onClick={() => handleLike(post._id)}
-                    className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition"
+                    className="flex items-center gap-2 text-white-600 hover:text-red-500 transition"
                   >
                     {post.isLiked ? (
                       <HeartSolidIcon className="h-6 w-6 text-red-500" />
@@ -160,7 +172,7 @@ function UserDashboard() {
 
                   <button
                     onClick={() => toggleComments(post._id)}
-                    className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition"
+                    className="flex items-center gap-1 text-white-600 hover:text-blue-500 transition"
                   >
                     <ChatBubbleLeftIcon className="h-5 w-5" />
                     <span className="text-xs">Comments</span>
@@ -168,7 +180,7 @@ function UserDashboard() {
                 </div>
 
                 {showComments[post._id] && post.comments && (
-                  <div className="mt-3 max-h-40 overflow-y-auto pr-1 text-sm text-gray-600 space-y-2">
+                  <div className="mt-3 max-h-40 overflow-y-auto pr-1 text-sm text-white-600 space-y-2">
                     {post.comments.map((comment) => (
                       <div key={comment._id} className="flex justify-between items-center">
                         <p>
@@ -206,16 +218,16 @@ function UserDashboard() {
         )}
       </main>
 
-      <footer className="bg-white shadow-md p-3 fixed bottom-0 left-0 right-0 flex justify-around border-t z-10">
-        <Link to="/" className="flex flex-col items-center text-gray-600 hover:text-blue-500">
+      <footer className="bg-black shadow-md p-3 fixed bottom-0 left-0 right-0 flex justify-around border-t z-10">
+        <Link to="/" className="flex flex-col items-center text-white-600 hover:text-blue-500">
           <HomeIcon className="h-6 w-6" />
           <span className="text-xs">Home</span>
         </Link>
-        <Link to="/create-post" className="flex flex-col items-center text-gray-600 hover:text-blue-500">
+        <Link to="/create-post" className="flex flex-col items-center text-white-600 hover:text-blue-500">
           <PlusCircleIcon className="h-6 w-6" />
           <span className="text-xs">New</span>
         </Link>
-        <Link to="/profile" className="flex flex-col items-center text-gray-600 hover:text-blue-500">
+        <Link to="/profile" className="flex flex-col items-center text-white-600 hover:text-blue-500">
           <UserIcon className="h-6 w-6" />
           <span className="text-xs">Profile</span>
         </Link>
