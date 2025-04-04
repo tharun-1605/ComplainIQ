@@ -88,12 +88,33 @@ function AdminDashboard() {
       console.error('Error updating status:', error.message);
     }
   };
+  const exportCSV = () => {
+    const csvData = [['ID', 'User', 'Content', 'Status', 'Likes', 'Comments']];
+    complaints.forEach(({ _id, user, content, status, likes, comments }) => {
+      csvData.push([_id, user?.name || 'Unknown', content, status, likes, comments.length]);
+    });
+    const csvContent = 'data:text/csv;charset=utf-8,' + csvData.map(e => e.join(',')).join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'complaints.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow p-4 rounded-lg flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
+<header className="bg-white dark:bg-gray-800 shadow p-4 rounded-lg flex justify-between items-center">
+<h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
+        <button 
+          onClick={exportCSV} 
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+        >
+          Export as CSV
+        </button>
       </header>
 
       {/* Stats */}
