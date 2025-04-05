@@ -129,7 +129,7 @@ useEffect(() => {
             >
               <div className="flex items-center gap-3 p-3">
                 <img
-                  src={post.user?.avatar || 'https://via.placeholder.com/40'}
+src={post.user?.avatar || '/path/to/local/default/avatar.png'}
                   alt={post.user?.name}
                   className="w-10 h-10 rounded-full object-cover border"
                 />

@@ -19,7 +19,19 @@ export const auth = {
     // Removed duplicate getProfile export
 
     login: (email, password) => api.post('/login', { email, password }),
-    register: (username, email, password) => api.post('/register', { username, email, password }),
+    register: (username, email, password, bio, profileImage) => {
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('email', email);
+        formData.append('password', password);
+        formData.append('bio', bio);
+        formData.append('profileImage', profileImage);
+        return api.post('/register', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+    },
     getProfile: () => api.get('/profile'),
 };
 

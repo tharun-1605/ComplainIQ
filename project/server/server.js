@@ -9,6 +9,7 @@ import connectDB from './config/db.js';
 import User from './models/User.js';
 import Post from './models/Post.js';
 import auth from './middleware/auth.js';
+import multer from 'multer'; // Moved import here
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,24 +23,47 @@ app.use(express.json());
 // Connect to MongoDB
 connectDB();
 
+// Multer configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Specify the directory to save uploaded files
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname); // Append timestamp to the filename
+  }
+});
+
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 } // Increase limit to 10MB
+});
+
 // Auth routes
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', upload.single('profileImage'), async (req, res) => {
     try {
-        const { username, email, password } = req.body;
-        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+        console.log('Received registration data:', req.body); // Log the incoming data
+        const { username, email, bio } = req.body;
+        const password = req.body.password; // Access password from req.body
+        const profileImage = req.file ? req.file.path : null; // Handle profile image
+
+        if (!password) {
+            return res.status(400).json({ message: 'Password is required' });
+        }
+        
+        const existingUser = await User.findOne({ $or: [{ email }, { username }] }).exec();
         
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ username, email, password: hashedPassword });
+        const user = new User({ username, email, password: hashedPassword, bio, profileImage }); // Include bio and profileImage
         await user.save();
 
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
         res.status(201).json({ token, user: { id: user._id, username, email, role: user.role } });
     } catch (error) {
-        console.error('Error creating post:', error); // Log the error for debugging
+        console.error('Error creating user:', error); // Log the error for debugging
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -76,21 +100,7 @@ app.get('/api/profile', auth, async (req, res) => {
     }
 });
 
-import multer from 'multer';
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Specify the directory to save uploaded files
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname); // Append timestamp to the filename
-  }
-});
-
-const upload = multer({ 
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // Limit file size to 5MB
-});
+// Duplicate multer configuration removed
 
 app.post('/api/posts', upload.single('image'), auth, async (req, res) => {
     // Add comments to the post

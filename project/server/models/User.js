@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['user', 'admin'],
         default: 'user'
+    },
+    avatar: { // New field for profile photo
+        type: String,
+        required: false // Optional field
     }
 }, { timestamps: true });
 
