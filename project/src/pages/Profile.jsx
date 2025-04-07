@@ -8,8 +8,8 @@ function ProfileUpdated() {
   const [profile, setProfile] = useState({
     name: '',
     email: '',
-    avatar: '',
-    bio: '',
+    avatar: 'path/to/default/avatar.png', // Default avatar
+    bio: 'No bio available', // Default bio
     location: null,
     joinedDate: null
   });
@@ -24,7 +24,20 @@ function ProfileUpdated() {
       try {
         const response = await auth.getProfile();
         console.log('Fetched profile data:', response.data); // Log the fetched profile data
-        setProfile(response.data);
+        console.log('Profile structure:', {
+          name: response.data.username || 'Unknown',
+          email: response.data.email,
+          avatar: response.data.avatar || 'path/to/default/avatar.png',
+          bio: response.data.bio || 'No bio available',
+        });
+        setProfile({
+          name: response.data.username || 'Unknown',
+          email: response.data.email,
+          avatar: response.data.avatar || 'path/to/default/avatar.png',
+          bio: response.data.bio || 'No bio available',
+          location: response.data.location || null,
+          joinedDate: response.data.createdAt || null,
+        });
         setEditedProfile(response.data);
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -82,7 +95,7 @@ function ProfileUpdated() {
         <div className="flex flex-col items-center">
           <div className="relative">
             <img
-              src={profile.avatar || 'path/to/default/avatar.png'} // Fallback image
+              src={profile.avatar} // Fallback image
               alt="Avatar"
               className="w-28 h-28 rounded-full border-4 border-pink-500"
             />

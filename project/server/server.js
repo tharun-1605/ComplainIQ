@@ -18,6 +18,7 @@ dotenv.config();
 console.log('MongoDB URI:', process.env.MONGODB_URI || 'Not defined');
 const app = express();
 app.use(cors());
+app.use(express.static('src')); // Serve static files from the src directory
 app.use(express.json());
 
 // Connect to MongoDB
@@ -41,7 +42,8 @@ const upload = multer({
 // Auth routes
 app.post('/api/register', upload.single('profileImage'), async (req, res) => {
     try {
-        console.log('Received registration data:', req.body); // Log the incoming data
+console.log('Received registration data:', req.body); // Log the incoming data
+console.log('Profile image path:', req.file ? req.file.path : 'No file uploaded'); // Log the profile image path
         const { username, email, bio } = req.body;
         const password = req.body.password; // Access password from req.body
         const profileImage = req.file ? req.file.path : null; // Handle profile image

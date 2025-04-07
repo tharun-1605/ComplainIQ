@@ -34,7 +34,7 @@ function UserDashboard() {
         });
         if (!response.ok) throw new Error('Failed to fetch posts.');
         const fetchedData = await response.json();
-        setPosts(fetchedData);
+setPosts(fetchedData.reverse());
       } catch (err) {
         setError(err.message);
       } finally {

@@ -22,7 +22,7 @@ function Register() {
     if (file) {
       const imageURL = URL.createObjectURL(file);
       setPreviewImage(imageURL);
-      setFormData({ ...formData, profileImage: imageURL }); // Or handle file uploading if needed
+setFormData({ ...formData, profileImage: file }); // Store the actual file object
     }
   };
 
