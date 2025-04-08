@@ -16,8 +16,6 @@ api.interceptors.request.use((config) => {
 });
 
 export const auth = {
-    // Removed duplicate getProfile export
-
     login: (email, password) => api.post('/login', { email, password }),
     register: (username, email, password, bio, profileImage) => {
         const formData = new FormData();
@@ -33,6 +31,7 @@ export const auth = {
         });
     },
     getProfile: () => api.get('/profile'),
+    getTotalLikes: (userId) => api.get(`/users/${userId}/likes`), // New method to fetch total likes
 };
 
 export const posts = {

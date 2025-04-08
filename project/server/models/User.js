@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
     avatar: { // Field for profile photo
         type: String,
         required: false // Optional field
+    },
+    totalLikes: { // New field for total likes
+        type: Number,
+        default: 0 // Initialize to 0
     }
 }, { timestamps: true });
 

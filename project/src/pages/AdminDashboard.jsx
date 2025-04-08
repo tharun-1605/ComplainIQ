@@ -157,7 +157,13 @@ function AdminDashboard() {
               </div>
             </div>
             <p className="mt-2 text-sm text-gray-900 dark:text-gray-100">{complaint.content}</p>
-            {complaint.image && <img src={complaint.image} alt="Complaint" className="mt-2 rounded-lg" />}
+{complaint.image && <img src={complaint.image} alt="Complaint" className="mt-2 rounded-lg" />}
+{complaint.video && (
+  <video controls className="mt-2 rounded-lg">
+    <source src={complaint.video} type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+)}
             <div className="mt-2 flex justify-between text-xs text-gray-500">
               <span>👍 {complaint.likes} Likes</span>
               <span>💬 {complaint.comments.length} Comments</span>

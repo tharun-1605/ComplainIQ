@@ -115,7 +115,13 @@ function ProfileUpdated() {
           {userPosts.length > 0 ? (
             userPosts.map((post) => (
               <div key={post.id} className="bg-black shadow-md rounded-lg overflow-hidden">
-                {post.image && <img src={post.image} alt={post.title} className="w-full h-48 object-cover" />}
+{post.image && <img src={post.image} alt={post.title} className="w-full h-48 object-cover" />}
+{post.video && (
+  <video controls className="w-full h-48 object-cover">
+    <source src={post.video} type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+)}
                 <div className="p-4">
                   <h3 className="text-lg font-semibold">{post.title}</h3>
                   <p className="text-white-600 mt-2">{post.content}</p>
@@ -123,7 +129,7 @@ function ProfileUpdated() {
                     <strong>Status:</strong> {post.status || 'Pending'}
                   </p>
                   <div className="mt-3 flex items-center space-x-4">
-                    <p className="text-white-700 font-semibold">❤️ {post.likes.length} Likes</p>
+<p className="text-white-700 font-semibold">❤️ {post.likes} Likes</p>
                   </div>
                   <div className="mt-3">
                     <h4 className="text-black-700 font-semibold">Comments:</h4>
