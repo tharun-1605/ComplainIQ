@@ -9,12 +9,12 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
-import clsx from 'clsx';
 
 function UserDashboard() {
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [posts, setPosts] = useState([]);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null);  
+  const [searchQuery, setSearchQuery] = useState(''); // New state for search query
   const [loading, setLoading] = useState(true);
   const [showComments, setShowComments] = useState({});
   const [likedComments, setLikedComments] = useState({});
@@ -34,7 +34,7 @@ function UserDashboard() {
         });
         if (!response.ok) throw new Error('Failed to fetch posts.');
         const fetchedData = await response.json();
-setPosts(fetchedData.reverse());
+        setPosts(fetchedData.reverse());
       } catch (err) {
         setError(err.message);
       } finally {
@@ -98,102 +98,109 @@ setPosts(fetchedData.reverse());
       [commentId]: !prev[commentId],
     }));
   };
-  const handleThemeToggle = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.body.className = newTheme; // Update body class for theme
-};
-useEffect(() => {
-  document.body.className = theme; // Set body class on theme change
-}, [theme]);
+
+  useEffect(() => {
+    document.body.className = theme;
+  }, [theme]);
 
   return (
-    <div className="min-h-screen bg-black-100 flex flex-col justify-between pt-4 pb-20 relative">
-    {/* <div className="min-h-screen bg-gray-50 flex flex-col justify-between pt-4 pb-20 relative"> */}
-    <header className="bg-black p-5 text-xl font-bold text-center sticky top-0 z-10">
-             Public Complaints
+    <div className="flex min-h-screen bg-black text-white">
+      {/* Sidebar */}
+      <aside className="w-64 h-screen sticky top-0 border-r border-zinc-800 bg-zinc-900 p-4 flex flex-col gap-6">
+        <h1 className="text-2xl font-bold text-center">Complaints</h1>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Search Complaints..."
+              className="w-full px-2 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => setSearchQuery(e.target.value)} // Update search query state
+            />
+            {/* <HomeIcon className="w-6 h-6" /> */}
+          </div>
+          <Link to="/" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
+          <HomeIcon className="w-6 h-6" />
+          <span>Home</span>
+        </Link>
+        <Link to="/create-post" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
+          <PlusCircleIcon className="w-6 h-6" />
+          <span>Create Post</span>
+        </Link>
+        <Link to="/profile" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
+          <UserIcon className="w-6 h-6" />
+          <span>Profile</span>
+        </Link>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <main className="flex-1 max-w-2xl mx-auto p-6">
+        <header className="sticky top-0 z-10 bg-black p-4 border-b border-zinc-800 text-center">
+          <h2 className="text-xl font-semibold">Public Complaints</h2>
         </header>
 
-      <main className="flex-1 max-w-xl mx-auto w-full p-4 space-y-6 bg-black-100">
         {error && <p className="text-red-500 text-center">{error}</p>}
         {loading ? (
-          <p className="text-center text-gray-500">Loading posts...</p>
+          <p className="text-center text-gray-400">Loading posts...</p>
         ) : posts.length === 0 ? (
-          <p className="text-center text-gray-500 text-lg">No posts available.</p>
+          <p className="text-center text-gray-400">No posts available.</p>
         ) : (
           posts.map((post) => (
-            <div
-              key={post._id}
-              className="bg-black rounded-xl shadow-sm hover:shadow-md transition duration-200"
-            >
+            <div key={post._id} className="bg-zinc-900 rounded-lg mb-6 shadow-lg">
               <div className="flex items-center gap-3 p-3">
                 <img
-src={post.user?.avatar || '/path/to/local/default/avatar.png'}
+                  src={post.user?.avatar || '/path/to/default/avatar.png'}
                   alt={post.user?.name}
-                  className="w-10 h-10 rounded-full object-cover border"
+                  className="w-10 h-10 rounded-full border object-cover"
                 />
-                <div className="flex flex-col items-start">
-                  <p className="font-semibold text-white-800">{post.user?.name || 'Unknown'}</p>
-                  <p className="text-xs text-white-500">{new Date(post.createdAt).toLocaleString()}</p>
-<p className="text-xs text-white-500">Status: {post.status} | Likes: {post.likes} | Comments: {post.comments?.length || 0}</p>
+                <div>
+                  <p className="font-semibold">{post.user?.name || 'Unknown'}</p>
+                  <p className="text-xs text-gray-400">{new Date(post.createdAt).toLocaleString()}</p>
+                  <p className="text-xs text-gray-400">
+                    Status: {post.status} | Likes: {post.likes} | Comments: {post.comments?.length || 0}
+                  </p>
                 </div>
               </div>
 
               {post.image && (
                 <div
-                  className="w-full max-h-[400px] overflow-hidden relative group cursor-pointer"
+                  className="w-full overflow-hidden cursor-pointer"
                   onDoubleClick={() => handleLike(post._id)}
                   onClick={() => setZoomImage(post.image)}
                 >
-                  <img
-                    src={post.image}
-                    alt="Post"
-                    className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
-                  />
+                  <img src={post.image} alt="Post" className="w-full object-cover max-h-[400px]" />
                 </div>
               )}
 
-              <div className="p-4 space-y-3">
-                <p className="text-sm text-white-800">{post.content}</p>
-
+              <div className="p-4">
+                <p className="mb-3 text-sm">{post.content}</p>
                 <div className="flex items-center justify-between">
-                  <button
-                    onClick={() => handleLike(post._id)}
-                    className="flex items-center gap-2 text-white-600 hover:text-red-500 transition"
-                  >
+                  <button onClick={() => handleLike(post._id)} className="flex items-center gap-1">
                     {post.isLiked ? (
-                      <HeartSolidIcon className="h-6 w-6 text-red-500" />
+                      <HeartSolidIcon className="w-6 h-6 text-red-500" />
                     ) : (
-                      <HeartIcon className="h-6 w-6" />
+                      <HeartIcon className="w-6 h-6 text-white" />
                     )}
                     <span className="text-sm">{post.likes}</span>
                   </button>
-
-                  <button
-                    onClick={() => toggleComments(post._id)}
-                    className="flex items-center gap-1 text-white-600 hover:text-blue-500 transition"
-                  >
-                    <ChatBubbleLeftIcon className="h-5 w-5" />
-                    <span className="text-xs">Comments</span>
+                  <button onClick={() => toggleComments(post._id)} className="flex items-center gap-1 text-white">
+                    <ChatBubbleLeftIcon className="w-5 h-5" />
+                    <span className="text-sm">Comments</span>
                   </button>
                 </div>
 
                 {showComments[post._id] && post.comments && (
-                  <div className="mt-3 max-h-40 overflow-y-auto pr-1 text-sm text-white-600 space-y-2">
+                  <div className="mt-3 max-h-40 overflow-y-auto pr-1 space-y-2 text-sm">
                     {post.comments.map((comment) => (
                       <div key={comment._id} className="flex justify-between items-center">
                         <p>
                           👤 <strong>{comment.author.username}:</strong> {comment.text}
                         </p>
-                        <button
-                          onClick={() => toggleCommentLike(comment._id)}
-                          className="text-gray-400 hover:text-red-500"
-                        >
+                        <button onClick={() => toggleCommentLike(comment._id)}>
                           {likedComments[comment._id] ? (
-                            <HeartSolidIcon className="h-4 w-4 text-red-500" />
+                            <HeartSolidIcon className="w-4 h-4 text-red-500" />
                           ) : (
-                            <HeartIcon className="h-4 w-4" />
+                            <HeartIcon className="w-4 h-4 text-white" />
                           )}
                         </button>
                       </div>
@@ -204,7 +211,7 @@ src={post.user?.avatar || '/path/to/local/default/avatar.png'}
                 <input
                   type="text"
                   placeholder="Add a comment..."
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-400"
+                  className="w-full mt-2 px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       handleCommentSubmit(post._id, e.target.value);
@@ -218,37 +225,17 @@ src={post.user?.avatar || '/path/to/local/default/avatar.png'}
         )}
       </main>
 
-      <footer className="bg-black shadow-md p-3 fixed bottom-0 left-0 right-0 flex justify-around border-t z-10">
-        <Link to="/" className="flex flex-col items-center text-white-600 hover:text-blue-500">
-          <HomeIcon className="h-6 w-6" />
-          <span className="text-xs">Home</span>
-        </Link>
-        <Link to="/create-post" className="flex flex-col items-center text-white-600 hover:text-blue-500">
-          <PlusCircleIcon className="h-6 w-6" />
-          <span className="text-xs">New</span>
-        </Link>
-        <Link to="/profile" className="flex flex-col items-center text-white-600 hover:text-blue-500">
-          <UserIcon className="h-6 w-6" />
-          <span className="text-xs">Profile</span>
-        </Link>
-      </footer>
-
-      {/* Image Zoom Modal */}
       {zoomImage && (
         <div
-          className="fixed inset-0 z-20 bg-black bg-opacity-70 flex items-center justify-center"
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
           onClick={() => setZoomImage(null)}
         >
           <div className="relative max-w-3xl w-full">
             <XMarkIcon
-              className="absolute top-4 right-4 h-6 w-6 text-white cursor-pointer z-30"
+              className="absolute top-4 right-4 w-6 h-6 text-white cursor-pointer z-10"
               onClick={() => setZoomImage(null)}
             />
-            <img
-              src={zoomImage}
-              alt="Zoomed"
-              className="w-full max-h-[90vh] object-contain rounded-xl shadow-lg"
-            />
+            <img src={zoomImage} alt="Zoomed" className="w-full max-h-[90vh] object-contain rounded-xl shadow-xl" />
           </div>
         </div>
       )}
