@@ -34,6 +34,7 @@ function UserDashboard() {
         });
         if (!response.ok) throw new Error('Failed to fetch posts.');
         const fetchedData = await response.json();
+        console.log('Fetched posts:', fetchedData); // Log the fetched posts
         setPosts(fetchedData.reverse());
       } catch (err) {
         setError(err.message);
@@ -116,20 +117,19 @@ function UserDashboard() {
               className="w-full px-2 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={(e) => setSearchQuery(e.target.value)} // Update search query state
             />
-            {/* <HomeIcon className="w-6 h-6" /> */}
           </div>
           <Link to="/" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
-          <HomeIcon className="w-6 h-6" />
-          <span>Home</span>
-        </Link>
-        <Link to="/create-post" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
-          <PlusCircleIcon className="w-6 h-6" />
-          <span>Create Post</span>
-        </Link>
-        <Link to="/profile" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
-          <UserIcon className="w-6 h-6" />
-          <span>Profile</span>
-        </Link>
+            <HomeIcon className="w-6 h-6" />
+            <span>Home</span>
+          </Link>
+          <Link to="/create-post" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
+            <PlusCircleIcon className="w-6 h-6" />
+            <span>Create Post</span>
+          </Link>
+          <Link to="/profile" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
+            <UserIcon className="w-6 h-6" />
+            <span>Profile</span>
+          </Link>
         </div>
       </aside>
 
@@ -162,13 +162,20 @@ function UserDashboard() {
                 </div>
               </div>
 
-              {post.image && (
+              {(post.image || post.video) && (
                 <div
                   className="w-full overflow-hidden cursor-pointer"
                   onDoubleClick={() => handleLike(post._id)}
-                  onClick={() => setZoomImage(post.image)}
                 >
-                  <img src={post.image} alt="Post" className="w-full object-cover max-h-[400px]" />
+                  {post.image && (
+                    <img src={post.image} alt="Post" className="w-full object-cover max-h-[400px]" />
+                  )}
+                  {post.video && (
+                    <video controls className="w-full object-cover max-h-[400px]">
+                      <source src={post.video} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  )}
                 </div>
               )}
 

@@ -104,12 +104,13 @@ app.get('/api/profile', auth, async (req, res) => {
 
 // Duplicate multer configuration removed
 
-app.post('/api/posts', upload.single('image'), auth, async (req, res) => {
+app.post('/api/posts', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video', maxCount: 1 }]), auth, async (req, res) => {
     // Add comments to the post
     try {
         const { title, content } = req.body;
         const post = new Post({
-            image: req.file ? req.file.path : null, // Include image URL if available
+            image: req.files['image'] ? req.files['image'][0].path : null, // Include image URL if available
+            video: req.files['video'] ? req.files['video'][0].path : null, // Include video URL if available
             title,
             content,
             author: req.user.id,

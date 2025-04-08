@@ -36,7 +36,11 @@ export const auth = {
 };
 
 export const posts = {
-    create: (title, content) => api.post('/posts', { title, content }),
+    create: (formData) => api.post('/posts', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    }),
     getAll: () => api.get('/posts')
 };
 

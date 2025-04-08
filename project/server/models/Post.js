@@ -5,6 +5,10 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    video: { // New field for video
+        type: String,
+        required: false
+    },
     comments: [{
         text: {
             type: String,
@@ -35,7 +39,7 @@ const postSchema = new mongoose.Schema({
     },
     status: { // Adding status field
         type: String,
-enum: ['Pending', 'Resolved', 'Rejected', 'Completed'], // Possible statuses
+        enum: ['Pending', 'Resolved', 'Rejected', 'Completed'], // Possible statuses
         default: 'Pending' // Default status
     }
 }, { timestamps: true });
