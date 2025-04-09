@@ -109,6 +109,14 @@ app.post('/api/posts', auth, async (req, res) => {
     // Add comments to the post
     try {
         const { title, content } = req.body;
+        // Log incoming request data
+        console.log('Incoming request data:', req.body);
+        
+        // Check for required fields
+        if (!req.body.title || !req.body.content) {
+            return res.status(400).json({ message: 'Title and content are required' });
+        }
+
         const post = new Post({
             image: req.files['image'] ? req.files['image'][0].path : null, // Include image URL if available
             video: req.files['video'] ? req.files['video'][0].path : null, // Include video URL if available
