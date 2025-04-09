@@ -19,6 +19,7 @@ console.log('MongoDB URI:', process.env.MONGODB_URI || 'Not defined');
 const app = express();
 app.use(cors());
 app.use(express.static('src')); // Serve static files from the src directory
+app.use(express.static('uploads')); // Serve static files from the uploads directory
 app.use(express.json());
 
 // Connect to MongoDB
