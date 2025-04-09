@@ -105,7 +105,7 @@ app.get('/api/profile', auth, async (req, res) => {
 
 // Duplicate multer configuration removed
 
-app.post('/api/posts', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video', maxCount: 1 }]), auth, async (req, res) => {
+app.post('/api/posts', auth, async (req, res) => {
     // Add comments to the post
     try {
         const { title, content } = req.body;

@@ -5,14 +5,23 @@ import axios from 'axios';
 
 function CreatePost() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ 
-    title: '',
-    content: '',
-    image: '',
-    video: '',
-  });
+    const [formData, setFormData] = useState({ 
+        title: '',
+        content: '',
+        image: null, // Change to null for file handling
+        video: null, // Change to null for file handling
+    });
 
-  const handleSubmit = async (e) => {
+const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+    });
+};
+
+const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.content.trim()) {
       toast.error('Please enter your complaint');

@@ -168,7 +168,7 @@ function UserDashboard() {
                   onDoubleClick={() => handleLike(post._id)}
                 >
                   {post.image && (
-                    <img src={post.image} alt="Post" className="w-full object-cover max-h-[400px]" />
+                    <img src={`/${post.image}`} alt="Post" className="w-full object-cover max-h-[400px]" />
                   )}
                   {post.video && (
                     <video controls className="w-full object-cover max-h-[400px]">
