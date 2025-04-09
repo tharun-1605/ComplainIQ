@@ -30,7 +30,7 @@ function CreatePost() {
             if (formData.video) {
                 formDataToSend.append('video', formData.video);
             }
-            await axios.post('http://localhost:5000/api/posts', formDataToSend, {
+            await axios.post('https://public-complient-websitw.onrender.com/api/posts', formDataToSend, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
