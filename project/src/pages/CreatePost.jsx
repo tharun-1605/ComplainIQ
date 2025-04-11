@@ -8,7 +8,7 @@ function CreatePost() {
     const [formData, setFormData] = useState({ 
         title: '',
         content: '',
-image: null, // Change to null for file handling
+        image: null, // Change to null for file handling
         video: null, // Change to null for file handling
     });
 
