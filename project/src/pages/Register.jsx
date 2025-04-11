@@ -33,17 +33,17 @@ const handleSubmit = async (e) => {
         return;
     }
     try {
-        const formDataToSend = new FormData();
-        formDataToSend.append('username', formData.username);
-        formDataToSend.append('email', formData.email);
-        formDataToSend.append('password', formData.password);
-        formDataToSend.append('bio', formData.bio);
-        if (formData.profileImage) {
-            formDataToSend.append('profileImage', formData.profileImage);
-        }
-        const response = await fetch('https://public-complient-websitw.onrender.com/api/register', {
+        const response = await fetch('http://localhost:5000/api/register', {
             method: 'POST',
-            body: formDataToSend,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: formData.username,
+              email: formData.email,
+              password: formData.password,
+              bio: formData.bio,
+              profileImage: formData.profileImage,
+            }),
+    
         });
 
       const data = await response.json();

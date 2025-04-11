@@ -105,18 +105,15 @@ app.get('/api/profile', auth, async (req, res) => {
 
 // Duplicate multer configuration removed
 
-app.post('/api/posts', auth, async (req, res) => {
-    // Add comments to the post
-    try {
-        const { title, content } = req.body;
-        // Log incoming request data
-        console.log('Incoming request data:', req.body);
-        
-        // Check for required fields
-        if (!req.body.title || !req.body.content) {
-            return res.status(400).json({ message: 'Title and content are required' });
-        }
+app.post('/api/posts', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video', maxCount: 1 }]), auth, async (req, res) => {
+    const { title, content } = req.body; // Extract title and content from request body
+    if (!title || !content) {
+        return res.status(400).json({ message: 'Title and content are required' }); // Validate required fields
+    }
 
+    // Add comments to the post
+    
+    try {
         const post = new Post({
             image: req.files['image'] ? req.files['image'][0].path : null, // Include image URL if available
             video: req.files['video'] ? req.files['video'][0].path : null, // Include video URL if available

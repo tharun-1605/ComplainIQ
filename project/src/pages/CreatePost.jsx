@@ -8,18 +8,9 @@ function CreatePost() {
     const [formData, setFormData] = useState({ 
         title: '',
         content: '',
-        image: null, // Change to null for file handling
-        video: null, // Change to null for file handling
+        image: '', // Change to null for file handling
+        video: '', // Change to null for file handling
     });
-
-const convertToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-    });
-};
 
 const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +30,7 @@ const handleSubmit = async (e) => {
             if (formData.video) {
                 formDataToSend.append('video', formData.video);
             }
-            await axios.post('https://public-complient-websitw.onrender.com/api/posts', formDataToSend, {
+            await axios.post('http://localhost:5000/api/posts', formDataToSend, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

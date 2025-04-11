@@ -2,11 +2,11 @@ import mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
     image: {
-        type: mongoose.Schema.Types.Mixed, // Change to Mixed type for GridFS
+        type: String, // Change to Mixed type for GridFS
         required: false
     },
     video: { // Change to Mixed type for GridFS
-        type: mongoose.Schema.Types.Mixed,
+        type: String,
         required: false
     },
     comments: [{
