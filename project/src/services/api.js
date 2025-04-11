@@ -38,7 +38,7 @@ export const auth = {
 export const posts = {
     create: (formData) => api.post('/posts', formData, {
         headers: {
-            'Content-Type': 'multipart/form-data',
+            'Content-Type': 'multipart/form-data', // Changed to multipart/form-data for file uploads
         },
     }),
     getAll: () => api.get('/posts')

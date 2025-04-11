@@ -9,7 +9,8 @@ import connectDB from './config/db.js';
 import User from './models/User.js';
 import Post from './models/Post.js';
 import auth from './middleware/auth.js';
-import multer from 'multer'; // Moved import here
+import multer from 'multer';
+import { MongoClient, GridFSBucket } from 'mongodb';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -20,7 +21,8 @@ const app = express();
 app.use(cors());
 app.use(express.static('src')); // Serve static files from the src directory
 app.use(express.static('uploads')); // Serve static files from the uploads directory
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+
 
 // Connect to MongoDB
 connectDB();
@@ -105,28 +107,30 @@ app.get('/api/profile', auth, async (req, res) => {
 
 // Duplicate multer configuration removed
 
-app.post('/api/posts', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video', maxCount: 1 }]), auth, async (req, res) => {
-    const { title, content } = req.body; // Extract title and content from request body
+app.post('/api/posts', auth, async (req, res) => {
+    console.log('Incoming request body:', req.body);
+    const { title, content, image, video } = req.body; // Include video in the destructured body
+  
     if (!title || !content) {
-        return res.status(400).json({ message: 'Title and content are required' }); // Validate required fields
+      return res.status(400).json({ message: 'Title and content are required' });
     }
-
-    // Add comments to the post
-    
+  
     try {
-        const post = new Post({
-            image: req.files['image'] ? req.files['image'][0].path : null, // Include image URL if available
-            video: req.files['video'] ? req.files['video'][0].path : null, // Include video URL if available
-            title,
-            content,
-            author: req.user.id,
-        });
-        await post.save();
-        res.status(201).json(post);
+      const post = new Post({
+        title,
+        content,
+        image,
+        video, // base64 string
+        author: req.user.id,
+      });
+      await post.save();
+      res.status(201).json(post);
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+      console.error('Error creating post:', error);
+      res.status(500).json({ message: 'Server error' });
     }
-});
+  });
+  
 
 app.get('/api/user/posts', async (req, res) => {
     try {

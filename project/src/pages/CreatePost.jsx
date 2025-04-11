@@ -8,39 +8,54 @@ function CreatePost() {
     const [formData, setFormData] = useState({ 
         title: '',
         content: '',
-        image: '', // Change to null for file handling
-        video: '', // Change to null for file handling
+image: null, // Change to null for file handling
+        video: null, // Change to null for file handling
     });
 
 const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.content.trim()) {
-      toast.error('Please enter your complaint');
-      return;
-    }
-    try {
-      const token = localStorage.getItem('token');
+  e.preventDefault();
 
-      const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('content', formData.content);
-      if (formData.image) {
-        formDataToSend.append('image', formData.image);
-      }
-            if (formData.video) {
-                formDataToSend.append('video', formData.video);
-            }
-            await axios.post('http://localhost:5000/api/posts', formDataToSend, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+  if (!formData.content.trim()) {
+    toast.error('Please enter your complaint');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token');
+
+    // Converts a file to base64
+    const toBase64 = (file) =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
       });
-      toast.success('Complaint posted successfully!');
-      navigate('/user-dashboard');
-    } catch (error) {
-      toast.error('Failed to post complaint. Please try again.');
-    }
-  };
+
+    const imageBase64 = formData.image ? await toBase64(formData.image) : null;
+    const videoBase64 = formData.video ? await toBase64(formData.video) : null;
+
+    const payload = {
+        title: formData.title,
+        content: formData.content,
+        image: imageBase64, // base64 string for image
+        video: videoBase64, // base64 string for video
+    };
+
+    await axios.post('http://localhost:5000/api/posts', payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    toast.success('Complaint posted successfully!');
+    navigate('/user-dashboard');
+  } catch (error) {
+    console.error('Submission error:', error);
+    toast.error('Failed to post complaint. Please try again.');
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black p-6">

@@ -5,8 +5,8 @@ const postSchema = new mongoose.Schema({
         type: String, // Change to Mixed type for GridFS
         required: false
     },
-    video: { // Change to Mixed type for GridFS
-        type: String,
+    video: {
+        type: mongoose.Schema.Types.Mixed, // Changed to Mixed type for better handling
         required: false
     },
     comments: [{
