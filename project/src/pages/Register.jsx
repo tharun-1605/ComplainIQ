@@ -33,7 +33,7 @@ const handleSubmit = async (e) => {
         return;
     }
     try {
-        const response = await fetch('http://localhost:5000/api/register', {
+        const response = await fetch('https://public-complient-websitw.onrender.com/api/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

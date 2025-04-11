@@ -13,7 +13,7 @@ function AdminDashboard() {
     const fetchComplaints = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/user/posts', {
+        const response = await fetch('https://public-complient-websitw.onrender.com/api/user/posts', {
           headers: { 'Authorization': `Bearer ${token}` },
         });
 
@@ -57,7 +57,7 @@ function AdminDashboard() {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      const url = `http://localhost:5000/api/user/complaints/${id}/status`;
+      const url = `https://public-complient-websitw.onrender.com/api/user/complaints/${id}/status`;
       console.log('Updating status for ID:', id); // Debugging log
       console.log('Using URL:', url); // Debugging log
 

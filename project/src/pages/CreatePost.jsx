@@ -42,7 +42,7 @@ const handleSubmit = async (e) => {
         video: videoBase64, // base64 string for video
     };
 
-    await axios.post('http://localhost:5000/api/posts', payload, {
+    await axios.post('https://public-complient-websitw.onrender.com/api/posts', payload, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
