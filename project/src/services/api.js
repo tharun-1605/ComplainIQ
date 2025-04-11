@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const API_URL = 'https://public-complient-websitw.onrender.com/api';
 
-
 const api = axios.create({
     baseURL: API_URL
 });
@@ -41,7 +40,8 @@ export const posts = {
             'Content-Type': 'multipart/form-data', // Changed to multipart/form-data for file uploads
         },
     }),
-    getAll: () => api.get('/posts')
+    getAll: () => api.get('/posts'),
+    delete: (postId) => api.delete(`/posts/${postId}`) // New method for deleting posts
 };
 
 export default api;

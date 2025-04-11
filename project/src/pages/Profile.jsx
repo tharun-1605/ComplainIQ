@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { auth } from '../services/api';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { posts } from '../services/api'; // Import posts service
 
 function ProfileUpdated() {
   const [userPosts, setUserPosts] = useState([]);
@@ -23,13 +24,6 @@ function ProfileUpdated() {
     const fetchProfile = async () => {
       try {
         const response = await auth.getProfile();
-        console.log('Fetched profile data:', response.data); // Log the fetched profile data
-        console.log('Profile structure:', {
-          name: response.data.username || 'Unknown',
-          email: response.data.email,
-          avatar: response.data.avatar || 'path/to/default/avatar.png',
-          bio: response.data.bio || 'No bio available',
-        });
         setProfile({
           name: response.data.username || 'Unknown',
           email: response.data.email,
@@ -58,9 +52,10 @@ function ProfileUpdated() {
             'Authorization': `Bearer ${token}`
           }
         });
-        console.log('Fetched user posts:', response.data);
+        console.log('Fetched user posts:', response.data); // Log the fetched user posts
         if (Array.isArray(response.data)) {
           setUserPosts(response.data);
+          console.log('User posts state:', response.data); // Log the user posts state
         } else {
           setUserPosts([]);
         }
@@ -85,6 +80,16 @@ function ProfileUpdated() {
     localStorage.removeItem('token');
     navigate('/');
   };
+
+  const handleDeletePost = async (postId) => {
+    try {
+      await posts.delete(postId);
+      setUserPosts(userPosts.filter(post => post._id !== postId));
+    } catch (error) {
+      console.error('Error deleting post:', error?.response?.data || error.message);
+    }
+  };
+  
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -115,13 +120,13 @@ function ProfileUpdated() {
           {userPosts.length > 0 ? (
             userPosts.map((post) => (
               <div key={post.id} className="bg-black shadow-md rounded-lg overflow-hidden">
-{post.image && <img src={post.image} alt={post.title} className="w-full h-48 object-cover" />}
-{post.video && (
-  <video controls className="w-full h-48 object-cover">
-    <source src={post.video} type="video/mp4" />
-    Your browser does not support the video tag.
-  </video>
-)}
+                {post.image && <img src={post.image} alt={post.title} className="w-full h-48 object-cover" />}
+                {post.video && (
+                  <video controls className="w-full h-48 object-cover">
+                    <source src={post.video} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
                 <div className="p-4">
                   <h3 className="text-lg font-semibold">{post.title}</h3>
                   <p className="text-white-600 mt-2">{post.content}</p>
@@ -129,7 +134,13 @@ function ProfileUpdated() {
                     <strong>Status:</strong> {post.status || 'Pending'}
                   </p>
                   <div className="mt-3 flex items-center space-x-4">
-<p className="text-white-700 font-semibold">❤️ {post.likes} Likes</p>
+                    <p className="text-white-700 font-semibold">❤️ {post.likes} Likes</p>
+                    <button 
+                      onClick={() => handleDeletePost(post._id)} 
+                      className="px-4 py-2 text-white bg-red-500 rounded-lg shadow-md hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
                   </div>
                   <div className="mt-3">
                     <h4 className="text-black-700 font-semibold">Comments:</h4>

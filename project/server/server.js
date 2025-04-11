@@ -214,5 +214,17 @@ app.put('/api/user/complaints/:complaintId/status', auth, async (req, res) => {
     }
 });
 
+app.delete('/api/posts/:postId', auth, async (req, res) => {
+    const postId = req.params.postId;
+    const post = await Post.findById(postId);
+    if (!post) {
+        console.log(`Post with ID ${postId} not found in DB`);
+        return res.status(404).json({ message: 'Post not found' });
+    }
+    await post.deleteOne();
+    res.status(200).json({ message: 'Post deleted successfully' });
+});
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -48,4 +48,8 @@ postSchema.statics.updateStatus = async function(complaintId, newStatus) {
     return await this.findByIdAndUpdate(complaintId, { status: newStatus }, { new: true });
 };
 
+postSchema.statics.deletePost = async function(postId) {
+    return await this.findByIdAndDelete(postId);
+};
+
 export default mongoose.model('Post', postSchema);
