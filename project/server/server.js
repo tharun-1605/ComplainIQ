@@ -162,8 +162,17 @@ app.post('/api/posts/:postId/like', auth, async (req, res) => {
             return res.status(404).json({ message: 'Post not found' });
         }
 
-        // Increment the like count
+        const user = await User.findById(req.user.id);
+        
+        if (user.likedPosts.includes(postId)) {
+            return res.status(400).json({ message: 'You have already liked this post.' });
+        }
+
+        // Add postId to user's likedPosts and increment the like count
+        user.likedPosts.push(postId);
         post.likes += 1;
+
+        await user.save();
         await post.save();
 
         res.status(200).json(post);

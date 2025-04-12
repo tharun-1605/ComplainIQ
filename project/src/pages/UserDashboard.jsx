@@ -47,9 +47,13 @@ function UserDashboard() {
 
   const handleLike = async (postId) => {
     try {
-      const response = await fetch(`https://public-complient-websitw.onrender.com/api/posts/${postId}/like`, {
+      const response = await fetch(`https://public-complient-websitw.onrender.com/api/posts/${postId}/like`, { 
         method: 'POST',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ postId }) // Send postId to check if already liked
       });
       if (!response.ok) throw new Error('Failed to like post');
       const updatedPost = await response.json();
