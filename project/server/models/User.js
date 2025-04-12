@@ -24,11 +24,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: false // Optional field
     },
-    likedPosts: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Post',
-        unique: true // Ensure a user can only like a post once
-    }],
     totalLikes: { // Existing field for total likes
         type: Number,
         default: 0 // Initialize to 0
