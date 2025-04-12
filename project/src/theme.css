@@ -38,3 +38,11 @@ body.dark {
   background-color: var(--bg-color-dark);
   color: var(--text-color-dark);
 }
+
+/* Responsive styles */
+@media (max-width: 640px) {
+  :root {
+    --bg-color-light: #f0f0f0; /* Adjust light background for mobile */
+    --text-color-light: #000; /* Adjust dark text for mobile */
+  }
+}

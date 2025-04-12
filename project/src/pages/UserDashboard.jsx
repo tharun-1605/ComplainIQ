@@ -14,11 +14,12 @@ function UserDashboard() {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);  
-  const [searchQuery, setSearchQuery] = useState(''); // New state for search query
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [showComments, setShowComments] = useState({});
   const [likedComments, setLikedComments] = useState({});
   const [zoomImage, setZoomImage] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar state
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -34,7 +35,6 @@ function UserDashboard() {
         });
         if (!response.ok) throw new Error('Failed to fetch posts.');
         const fetchedData = await response.json();
-        console.log('Fetched posts:', fetchedData); // Log the fetched posts
         setPosts(fetchedData.reverse());
       } catch (err) {
         setError(err.message);
@@ -105,33 +105,53 @@ function UserDashboard() {
   }, [theme]);
 
   return (
-    <div className="flex min-h-screen bg-black text-white">
+    <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
       {/* Sidebar */}
-      <aside className="w-64 h-screen sticky top-0 border-r border-zinc-800 bg-zinc-900 p-4 flex flex-col gap-6">
-        <h1 className="text-2xl font-bold text-center">Complaints</h1>
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              placeholder="Search Complaints..."
-              className="w-full px-2 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onChange={(e) => setSearchQuery(e.target.value)} // Update search query state
-            />
-          </div>
-          <Link to="/" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
-            <HomeIcon className="w-6 h-6" />
-            <span>Home</span>
-          </Link>
-          <Link to="/create-post" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
-            <PlusCircleIcon className="w-6 h-6" />
-            <span>Create Post</span>
-          </Link>
-          <Link to="/profile" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
-            <UserIcon className="w-6 h-6" />
-            <span>Profile</span>
-          </Link>
-        </div>
+      <aside className={`transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-0'} h-auto md:h-screen sticky top-0 border-r border-zinc-800 bg-zinc-900 p-4 flex flex-col gap-6`}>
+        {isSidebarOpen && (
+          <>
+            <h1 className="text-2xl font-bold text-center">Complaints</h1>
+            <div className="flex justify-between items-center">
+              {/* <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-white">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+              </button> */}
+            </div>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Search Complaints..."
+                  className="w-full px-2 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <Link to="/" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
+                <HomeIcon className="w-6 h-6" />
+                <span>Home</span>
+              </Link>
+              <Link to="/create-post" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
+                <PlusCircleIcon className="w-6 h-6" />
+                <span>Create Post</span>
+              </Link>
+              <Link to="/profile" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
+                <UserIcon className="w-6 h-6" />
+                <span>Profile</span>
+              </Link>
+            </div>
+          </>
+        )}
       </aside>
+
+      {/* Three-Dot Icon */}
+      <div className="absolute top-4 left-4">
+        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-white">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+          </svg>
+        </button>
+      </div>
 
       {/* Main content */}
       <main className="flex-1 max-w-2xl mx-auto p-6">

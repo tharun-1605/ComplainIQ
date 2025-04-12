@@ -9,16 +9,12 @@ function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Debounced Input Handling
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Clear error when user starts typing
     setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
-  // Validation before submission
   const validateForm = () => {
     let newErrors = {};
     if (!formData.email.includes('@')) newErrors.email = 'Invalid email format';
@@ -57,12 +53,11 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-greay-600 px-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-gray-600 px-6">
       <div className="bg-white bg-opacity-20 backdrop-blur-lg shadow-2xl rounded-2xl p-8 max-w-md w-full transition-all transform hover:scale-105">
         <h2 className="text-center text-3xl font-extrabold text-white animate-fade-in">Welcome Back</h2>
         <p className="text-center text-white mb-6">Sign in to your account</p>
 
-        {/* User/Admin Toggle */}
         <div className="flex justify-center mb-6 bg-white bg-opacity-30 rounded-lg transition-all">
           <button
             onClick={() => setIsAdmin(false)}

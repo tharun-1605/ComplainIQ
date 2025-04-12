@@ -22,29 +22,28 @@ function Register() {
     if (file) {
       const imageURL = URL.createObjectURL(file);
       setPreviewImage(imageURL);
-setFormData({ ...formData, profileImage: file }); // Store the actual file object
+      setFormData({ ...formData, profileImage: file });
     }
   };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-        toast.error('Passwords do not match!');
-        return;
+      toast.error('Passwords do not match!');
+      return;
     }
     try {
-        const response = await fetch('https://public-complient-websitw.onrender.com/api/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              username: formData.username,
-              email: formData.email,
-              password: formData.password,
-              bio: formData.bio,
-              profileImage: formData.profileImage,
-            }),
-    
-        });
+      const response = await fetch('https://public-complient-websitw.onrender.com/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          bio: formData.bio,
+          profileImage: formData.profileImage,
+        }),
+      });
 
       const data = await response.json();
 
