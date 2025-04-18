@@ -37,6 +37,14 @@ const postSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    latitude: {
+        type: Number,
+        required: false
+    },
+    longitude: {
+        type: Number,
+        required: false
+    },
     status: { // Adding status field
         type: String,
         enum: ['Pending', 'Resolved', 'Rejected', 'Completed'], // Possible statuses

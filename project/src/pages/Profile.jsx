@@ -47,7 +47,7 @@ function ProfileUpdated() {
     const fetchUserPosts = async () => {
       const token = localStorage.getItem('token');
       try {
-        const response = await axios.get('https://public-complient-websitw.onrender.com/api/posts', {
+        const response = await axios.get('http://localhost:5000/api/posts', {
           headers: {
             'Authorization': `Bearer ${token}`
           }

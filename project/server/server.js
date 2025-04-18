@@ -109,7 +109,7 @@ app.get('/api/profile', auth, async (req, res) => {
 
 app.post('/api/posts', auth, async (req, res) => {
     console.log('Incoming request body:', req.body);
-    const { title, content, image, video } = req.body; // Include video in the destructured body
+    const { title, content, image, video, latitude, longitude } = req.body; // Include latitude and longitude
   
     if (!title || !content) {
       return res.status(400).json({ message: 'Title and content are required' });
@@ -121,6 +121,8 @@ app.post('/api/posts', auth, async (req, res) => {
         content,
         image,
         video, // base64 string
+        latitude,
+        longitude,
         author: req.user.id,
       });
       await post.save();

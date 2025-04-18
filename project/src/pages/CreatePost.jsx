@@ -1,61 +1,120 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
 function CreatePost() {
   const navigate = useNavigate();
-    const [formData, setFormData] = useState({ 
-        title: '',
-        content: '',
-        image: null, // Change to null for file handling
-        video: null, // Change to null for file handling
-    });
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    image: null, // Change to null for file handling
+    video: null, // Change to null for file handling
+    latitude: null,
+    longitude: null,
+    useCurrentLocation: false,
+  });
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState(null);
 
-  if (!formData.content.trim()) {
-    toast.error('Please enter your complaint');
-    return;
-  }
+  const fetchLocation = () => {
+    if (navigator.geolocation) {
+      setLocationLoading(true);
+      setLocationError(null);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setFormData((prev) => ({
+            ...prev,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          }));
+          toast.success('Location fetched successfully!');
+          setLocationLoading(false);
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          let errorMessage = 'Failed to fetch location. Please allow location access.';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = 'Location permission denied. Please allow location access.';
+              break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage = 'Location information is unavailable. Please ensure your device location services are enabled.';
+                break;
+            case error.TIMEOUT:
+              errorMessage = 'Location request timed out. Please try again.';
+              break;
+            default:
+              errorMessage = 'An unknown error occurred while fetching location.';
+              break;
+          }
+          toast.error(errorMessage);
+          setLocationError(errorMessage);
+          setLocationLoading(false);
+        }
+      );
+    } else {
+      toast.error('Geolocation is not supported by this browser.');
+      setFormData((prev) => ({ ...prev, useCurrentLocation: false }));
+    }
+  };
 
-  try {
-    const token = localStorage.getItem('token');
+  useEffect(() => {
+    if (formData.useCurrentLocation) {
+      fetchLocation();
+    }
+  }, [formData.useCurrentLocation]);
 
-    // Converts a file to base64
-    const toBase64 = (file) =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const imageBase64 = formData.image ? await toBase64(formData.image) : null;
-    const videoBase64 = formData.video ? await toBase64(formData.video) : null;
+    if (!formData.content.trim()) {
+      toast.error('Please enter your complaint');
+      return;
+    }
 
-    const payload = {
+    try {
+      const token = localStorage.getItem('token');
+
+      // Converts a file to base64
+      const toBase64 = (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+      const imageBase64 = formData.image ? await toBase64(formData.image) : null;
+      const videoBase64 = formData.video ? await toBase64(formData.video) : null;
+
+      const payload = {
         title: formData.title,
         content: formData.content,
         image: imageBase64, // base64 string for image
         video: videoBase64, // base64 string for video
-    };
+      };
 
-    await axios.post('https://public-complient-websitw.onrender.com/api/posts', payload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+      if (formData.useCurrentLocation && formData.latitude && formData.longitude) {
+        payload.latitude = formData.latitude;
+        payload.longitude = formData.longitude;
+      }
 
-    toast.success('Complaint posted successfully!');
-    navigate('/user-dashboard');
-  } catch (error) {
-    console.error('Submission error:', error);
-    toast.error('Failed to post complaint. Please try again.');
-  }
-};
+      await axios.post('http://localhost:5000/api/posts', payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      toast.success('Complaint posted successfully!');
+      navigate('/user-dashboard');
+    } catch (error) {
+      console.error('Submission error:', error);
+      toast.error('Failed to post complaint. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black p-6">
@@ -115,6 +174,29 @@ const handleSubmit = async (e) => {
               }}
               className="w-full mt-1 p-2 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id="useCurrentLocation"
+            checked={formData.useCurrentLocation}
+            onChange={(e) => setFormData({ ...formData, useCurrentLocation: e.target.checked })}
+            className="rounded"
+            disabled={locationLoading}
+          />
+          <label htmlFor="useCurrentLocation" className="text-sm font-semibold text-gray-300">
+            {locationLoading ? 'Fetching location...' : 'Add current location'}
+          </label>
+          {locationError && !locationLoading && (
+            <button
+              type="button"
+              onClick={fetchLocation}
+              className="ml-3 px-3 py-1 text-sm rounded bg-red-600 hover:bg-red-700 text-white"
+            >
+              Retry
+            </button>
+          )}
           </div>
 
           <div className="flex justify-between">
