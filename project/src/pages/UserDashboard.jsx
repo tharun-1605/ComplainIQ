@@ -186,6 +186,7 @@ function UserDashboard() {
                 <div
                   className="w-full overflow-hidden cursor-pointer"
                   onDoubleClick={() => handleLike(post._id)}
+                  onClick={() => post.image && setZoomImage(post.image)}
                 >
                   {post.image && (
                   <img src={post.image} alt="Post" className="w-full object-cover max-h-[400px]" />
