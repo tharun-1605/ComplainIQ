@@ -29,7 +29,7 @@ function AdminDashboard() {
     const fetchComplaints = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/user/posts', {
+        const response = await fetch('https://public-complient-websitw.onrender.com/api/user/posts', {
           headers: { 'Authorization': `Bearer ${token}` },
         });
 
@@ -103,6 +103,14 @@ function AdminDashboard() {
               },
             });
           }
+          // Fit map bounds to the route
+          const coordinates = routeGeoJSON.coordinates;
+          const bounds = coordinates.reduce(function(bounds, coord) {
+            return bounds.extend(coord);
+          }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+          mapRef.current.fitBounds(bounds, {
+            padding: 50
+          });
         } else {
           // Add marker for simple view location
           new mapboxgl.Marker()
@@ -134,7 +142,12 @@ function AdminDashboard() {
     }
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        console.log('Current position fetched:', position);
         const { latitude, longitude } = position.coords;
+        if (!latitude || !longitude) {
+          alert('Could not get valid coordinates from your location');
+          return;
+        }
         try {
           const query = await fetch(
             `https://api.mapbox.com/directions/v5/mapbox/driving/${longitude},${latitude};${destination.lng},${destination.lat}?geometries=geojson&access_token=${mapboxgl.accessToken}`
@@ -153,9 +166,10 @@ function AdminDashboard() {
         }
       },
       (error) => {
-        alert('Unable to retrieve your location');
-        console.error(error);
-      }
+        alert('Unable to retrieve your location: ' + error.message);
+        console.error('Geolocation error:', error);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -175,7 +189,7 @@ function AdminDashboard() {
   const updateStatus = async (id, newStatus) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/user/complaints/${id}/status`, {
+      const response = await fetch(`https://public-complient-websitw.onrender.com/api/user/complaints/${id}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
