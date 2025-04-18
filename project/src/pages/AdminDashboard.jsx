@@ -230,9 +230,9 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
       <header className="bg-white dark:bg-gray-800 shadow p-4 rounded-lg flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">ComplainIQ Admin Dashboard</h1>
         <div className="flex space-x-2">
-          <button
+          {/* <button
             onClick={() => trackLocation(selectedLocation)}
             className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
             title="Track Location"
@@ -246,7 +246,7 @@ function AdminDashboard() {
             title="Close Map"
           >
             Close Map
-          </button>
+          </button> */}
           <button
             onClick={exportCSV}
             className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"

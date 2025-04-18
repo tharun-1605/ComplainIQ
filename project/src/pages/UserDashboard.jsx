@@ -110,7 +110,7 @@ function UserDashboard() {
       <aside className={`transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-0'} h-auto md:h-screen sticky top-0 border-r border-zinc-800 bg-zinc-900 p-4 flex flex-col gap-6`}>
         {isSidebarOpen && (
           <>
-            <h1 className="text-2xl font-bold text-center">Complaints</h1>
+            <h1 className="text-2xl font-bold text-center">ComplainIQ</h1>
             <div className="flex justify-between items-center">
               {/* <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-white">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
