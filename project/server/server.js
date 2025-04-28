@@ -33,7 +33,9 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/'); // Specify the directory to save uploaded files
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname); // Append timestamp to the filename
+    // Sanitize filename: replace spaces with underscores, remove commas and other special chars
+    const safeName = file.originalname.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '');
+    cb(null, Date.now() + '-' + safeName); // Append timestamp to the sanitized filename
   }
 });
 
@@ -225,6 +227,93 @@ app.delete('/api/posts/:postId', auth, async (req, res) => {
     res.status(200).json({ message: 'Post deleted successfully' });
 });
 
+
+// Route to handle admin reply with media upload
+import fs from 'fs';
+
+app.post('/api/admin/posts/:postId/reply', auth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video', maxCount: 1 }]), async (req, res) => {
+  console.log('Received admin reply request');
+  console.log('Request params:', req.params);
+  console.log('Request user:', req.user);
+  console.log('Request body:', req.body);
+  console.log('Request files:', req.files);
+
+  try {
+    const { postId } = req.params;
+    const adminId = req.user.id;
+    const description = req.body.description;
+
+    if (!description) {
+      return res.status(400).json({ message: 'Description is required' });
+    }
+
+    let imageBase64 = null;
+    let videoBase64 = null;
+
+    if (req.files) {
+      if (req.files.image && req.files.image.length > 0) {
+        const imageFile = req.files.image[0];
+        const imageData = fs.readFileSync(imageFile.path);
+        const imageMime = imageFile.mimetype;
+        imageBase64 = `data:${imageMime};base64,${imageData.toString('base64')}`;
+        // Optionally delete the file after reading
+        fs.unlinkSync(imageFile.path);
+      }
+      if (req.files.video && req.files.video.length > 0) {
+        const videoFile = req.files.video[0];
+        const videoData = fs.readFileSync(videoFile.path);
+        const videoMime = videoFile.mimetype;
+        videoBase64 = `data:${videoMime};base64,${videoData.toString('base64')}`;
+        // Optionally delete the file after reading
+        fs.unlinkSync(videoFile.path);
+      }
+    }
+
+    // Create new AdminPost document
+    const AdminPost = (await import('./models/AdminPost.js')).default;
+    const newAdminPost = new AdminPost({
+      postId,
+      adminId,
+      description,
+      image: imageBase64,
+      video: videoBase64,
+    });
+
+    await newAdminPost.save();
+
+    res.status(201).json({ message: 'Admin reply posted successfully', adminPost: newAdminPost });
+  } catch (error) {
+    console.error('Error posting admin reply:', error);
+    res.status(500).json({ message: 'Server error', error: error.message, stack: error.stack });
+  }
+});
+
+// Route to get completed complaints with embedded admin reply including media
+app.get('/api/user/completed-complaints', auth, async (req, res) => {
+  try {
+    const Post = (await import('./models/Post.js')).default;
+    const AdminPost = (await import('./models/AdminPost.js')).default;
+
+    // Fetch completed complaints (assuming status 'completed')
+    const completedComplaints = await Post.find({ status: 'Completed' }).lean();
+
+    // For each complaint, find the admin reply if any
+    const complaintsWithAdminReply = await Promise.all(
+      completedComplaints.map(async (complaint) => {
+        const adminReply = await AdminPost.findOne({ postId: complaint._id.toString() }).lean();
+        return {
+          ...complaint,
+          adminReply: adminReply || null,
+        };
+      })
+    );
+
+    res.json(complaintsWithAdminReply);
+  } catch (error) {
+    console.error('Error fetching completed complaints:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

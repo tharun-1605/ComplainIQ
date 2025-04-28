@@ -326,6 +326,16 @@ function AdminDashboard() {
               </select>
             </div>
 
+            {/* Send Reply Button */}
+            <div className="mt-2">
+              <button
+                onClick={() => window.location.href = `/admin-reply/${complaint._id}`}
+                className="text-blue-600 hover:text-blue-800 text-sm font-semibold"
+              >
+                Send Reply
+              </button>
+            </div>
+
             {/* Location Buttons */}
             <div className="mt-2 flex space-x-4">
               <button

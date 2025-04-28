@@ -6,6 +6,8 @@ import UserDashboard from './pages/UserDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Profile from './pages/Profile';
 import CreatePost from './pages/CreatePost';
+import AdminReply from './pages/AdminReply';
+import CompletedComplaints from './pages/CompletedComplaints';
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/create-post" element={<CreatePost />} />
+        <Route path="/admin-reply/:postId" element={<AdminReply />} />
+        <Route path="/completed-complaints" element={<CompletedComplaints />} />
       </Routes>
     </Router>
   );
