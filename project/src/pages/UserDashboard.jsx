@@ -1,42 +1,38 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
-  ArrowUpIcon,
+  HeartIcon,
   ChatBubbleLeftIcon,
   HomeIcon,
   PlusCircleIcon,
   UserIcon,
   XMarkIcon,
+  FlagIcon,
 } from '@heroicons/react/24/outline';
-import debounce from 'lodash.debounce';
+import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 
 function UserDashboard() {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [posts, setPosts] = useState([]);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null);  
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [showComments, setShowComments] = useState({});
   const [likedComments, setLikedComments] = useState({});
   const [zoomImage, setZoomImage] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const location = useLocation(); // to highlight active link
-
-  const authHeaders = {
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
-  };
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar state
 
   useEffect(() => {
     const fetchPosts = async () => {
-      if (!authHeaders.Authorization) {
+      const token = localStorage.getItem('token');
+      if (!token) {
         setError('No token found. Please log in.');
         setLoading(false);
         return;
       }
       try {
-        const response = await fetch('https://public-complient-websitw.onrender.com/api/user/posts', {
-          headers: authHeaders,
+        const response = await fetch('http://localhost:5000/api/user/posts', {
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) throw new Error('Failed to fetch posts.');
         const fetchedData = await response.json();
@@ -52,38 +48,31 @@ function UserDashboard() {
 
   const handleLike = async (postId) => {
     try {
-      const post = posts.find((p) => p._id === postId);
-      const newLikeStatus = !post.isLiked;
-
-      const response = await fetch(`https://public-complient-websitw.onrender.com/api/posts/${postId}/like`, {
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, { 
         method: 'POST',
-        headers: authHeaders,
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       if (!response.ok) throw new Error('Failed to like post');
       const updatedPost = await response.json();
-
-      setPosts(posts.map((p) =>
-        p._id === postId
-          ? {
-              ...p,
-              likes: newLikeStatus ? p.likes + 1 : p.likes - 1, // increase/decrease like count
-              isLiked: newLikeStatus, // toggle like status
-            }
-          : p
-      ));
+      setPosts(
+        posts.map((post) =>
+          post._id === postId
+            ? { ...post, likes: updatedPost.likes, isLiked: !post.isLiked }
+            : post
+        )
+      );
     } catch (error) {
       console.error(error.message);
     }
   };
 
   const handleCommentSubmit = async (postId, commentText) => {
-    if (!commentText.trim()) return; // prevent empty comment
     try {
-      const response = await fetch(`https://public-complient-websitw.onrender.com/api/posts/${postId}/comment`, {
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...authHeaders,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify({ comment: commentText }),
       });
@@ -116,61 +105,44 @@ function UserDashboard() {
     document.body.className = theme;
   }, [theme]);
 
-  // Debounced search function
-  const debouncedSearch = useCallback(debounce((query) => {
-    setSearchQuery(query);
-  }, 300), []);
-
-  const handleSearchChange = (e) => {
-    debouncedSearch(e.target.value);
-  };
-
-  const filteredPosts = posts.filter(post =>
-    post.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.user?.name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Function to get the status color class
-  const getStatusColorClass = (status) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'text-green-500';
-      case 'pending':
-        return 'text-yellow-500';
-      case 'rejected':
-        return 'text-red-500';
-      default:
-        return 'text-white'; // default color for unknown status
-    }
-  };
-
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
       {/* Sidebar */}
-      <aside className={`transition-all duration-500 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-0'} h-auto md:h-screen sticky top-0 border-r border-zinc-800 bg-zinc-900 p-4 overflow-hidden flex flex-col gap-6`}>
+      <aside className={`transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-0'} h-auto md:h-screen sticky top-0 border-r border-zinc-800 bg-zinc-900 p-4 flex flex-col gap-6`}>
         {isSidebarOpen && (
           <>
             <h1 className="text-2xl font-bold text-center">ComplainIQ</h1>
+            <div className="flex justify-between items-center">
+              {/* <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-white">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+              </button> */}
+            </div>
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2">
                 <input
                   type="text"
                   placeholder="Search Complaints..."
                   className="w-full px-2 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={handleSearchChange}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Link to="/" className={`flex items-center gap-3 p-2 rounded hover:bg-zinc-800 ${location.pathname === '/' && 'bg-zinc-800'}`}>
+              <Link to="/" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
                 <HomeIcon className="w-6 h-6" />
                 <span>Home</span>
               </Link>
-              <Link to="/create-post" className={`flex items-center gap-3 p-2 rounded hover:bg-zinc-800 ${location.pathname === '/create-post' && 'bg-zinc-800'}`}>
+              <Link to="/create-post" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
                 <PlusCircleIcon className="w-6 h-6" />
                 <span>Create Post</span>
               </Link>
-              <Link to="/profile" className={`flex items-center gap-3 p-2 rounded hover:bg-zinc-800 ${location.pathname === '/profile' && 'bg-zinc-800'}`}>
+              <Link to="/profile" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
                 <UserIcon className="w-6 h-6" />
                 <span>Profile</span>
+              </Link>
+              <Link to="/completed-complaints" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
+                <FlagIcon className="w-6 h-6" />
+                <span>Completed Complaints</span>
               </Link>
             </div>
           </>
@@ -180,7 +152,7 @@ function UserDashboard() {
       {/* Three-Dot Icon */}
       <div className="absolute top-4 left-4">
         <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-white">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
           </svg>
         </button>
@@ -193,29 +165,23 @@ function UserDashboard() {
         </header>
 
         {error && <p className="text-red-500 text-center">{error}</p>}
-
         {loading ? (
-          <div className="space-y-6 mt-6">
-            {[1,2,3].map((_, idx) => (
-              <div key={idx} className="h-40 bg-zinc-800 rounded-lg animate-pulse" />
-            ))}
-          </div>
-        ) : filteredPosts.length === 0 ? (
-          <p className="text-center text-gray-400 mt-6">No matching posts found.</p>
+          <p className="text-center text-gray-400">Loading posts...</p>
+        ) : posts.length === 0 ? (
+          <p className="text-center text-gray-400">No posts available.</p>
         ) : (
-          filteredPosts.map((post) => (
+          posts.map((post) => (
             <div key={post._id} className="bg-zinc-900 rounded-lg mb-6 shadow-lg">
               <div className="flex items-center gap-3 p-3">
                 <img
                   src={post.user?.avatar || '/path/to/default/avatar.png'}
-                  alt={post.user?.name || 'User Avatar'}
-                  loading="lazy"
+                  alt={post.user?.name}
                   className="w-10 h-10 rounded-full border object-cover"
                 />
                 <div>
                   <p className="font-semibold">{post.user?.name || 'Unknown'}</p>
                   <p className="text-xs text-gray-400">{new Date(post.createdAt).toLocaleString()}</p>
-                  <p className={`text-xs ${getStatusColorClass(post.status)}`}>
+                  <p className="text-xs text-gray-400">
                     Status: {post.status} | Likes: {post.likes} | Comments: {post.comments?.length || 0}
                   </p>
                 </div>
@@ -228,7 +194,7 @@ function UserDashboard() {
                   onClick={() => post.image && setZoomImage(post.image)}
                 >
                   {post.image && (
-                    <img src={post.image} loading="lazy" alt="Post" className="w-full object-cover max-h-[400px]" />
+                  <img src={post.image} alt="Post" className="w-full object-cover max-h-[400px]" />
                   )}
                   {post.video && (
                     <video controls className="w-full object-cover max-h-[400px]">
@@ -238,55 +204,74 @@ function UserDashboard() {
                   )}
                 </div>
               )}
-              
+
               <div className="p-4">
-                <p className="text-sm">{post.content}</p>
-              </div>
+                <p className="mb-3 text-sm">{post.content}</p>
+                <div className="flex items-center justify-between">
+                  <button onClick={() => handleLike(post._id)} className="flex items-center gap-1">
+                    {post.isLiked ? (
+                      <HeartSolidIcon className="w-6 h-6 text-red-500" />
+                    ) : (
+                      <HeartIcon className="w-6 h-6 text-white" />
+                    )}
+                    <span className="text-sm">{post.likes}</span>
+                  </button>
+                  <button onClick={() => toggleComments(post._id)} className="flex items-center gap-1 text-white">
+                    <ChatBubbleLeftIcon className="w-5 h-5" />
+                    <span className="text-sm">Comments</span>
+                  </button>
+                </div>
 
-              {/* Like Button */}
-              <button
-                onClick={() => handleLike(post._id)}
-                className="flex items-center gap-1 p-3 text-white hover:bg-zinc-800 w-full border-t border-zinc-800"
-              >
-                <ArrowUpIcon className={`w-6 h-6 ${post.isLiked ? 'text-blue-500' : 'text-white'}`} />
-                <span className="text-sm">{post.likes}</span>
-              </button>
-
-              {/* Comments */}
-              <div>
-                {showComments[post._id] && (
-                  <div className="space-y-2">
-                    {post.comments?.map((comment) => (
-                      <div key={comment._id} className="p-4">
-                        <p>{comment.text}</p>
+                {showComments[post._id] && post.comments && (
+                  <div className="mt-3 max-h-40 overflow-y-auto pr-1 space-y-2 text-sm">
+                    {post.comments.map((comment) => (
+                      <div key={comment._id} className="flex justify-between items-center">
+                        <p>
+                          👤 <strong>{comment.author.username}:</strong> {comment.text}
+                        </p>
                         <button onClick={() => toggleCommentLike(comment._id)}>
-                          <ArrowUpIcon
-                            className={`w-5 h-5 ${likedComments[comment._id] ? 'text-blue-500' : 'text-gray-400'}`}
-                          />
+                          {likedComments[comment._id] ? (
+                            <HeartSolidIcon className="w-4 h-4 text-red-500" />
+                          ) : (
+                            <HeartIcon className="w-4 h-4 text-white" />
+                          )}
                         </button>
                       </div>
                     ))}
-                    <input
-                      type="text"
-                      placeholder="Add a comment..."
-                      className="w-full px-2 py-1 rounded-md bg-zinc-800 text-white"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleCommentSubmit(post._id, e.target.value);
-                      }}
-                    />
                   </div>
                 )}
-                <button
-                  className="text-sm text-blue-500"
-                  onClick={() => toggleComments(post._id)}
-                >
-                  {showComments[post._id] ? 'Hide comments' : 'Show comments'}
-                </button>
+
+                <input
+                  type="text"
+                  placeholder="Add a comment..."
+                  className="w-full mt-2 px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleCommentSubmit(post._id, e.target.value);
+                      e.target.value = '';
+                    }
+                  }}
+                />
               </div>
             </div>
           ))
         )}
       </main>
+
+      {zoomImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
+          onClick={() => setZoomImage(null)}
+        >
+          <div className="relative max-w-3xl w-full">
+            <XMarkIcon
+              className="absolute top-4 right-4 w-6 h-6 text-white cursor-pointer z-10"
+              onClick={() => setZoomImage(null)}
+            />
+            <img src={zoomImage} alt="Zoomed" className="w-full max-h-[90vh] object-contain rounded-xl shadow-xl" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
