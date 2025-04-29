@@ -228,45 +228,20 @@ app.delete('/api/posts/:postId', auth, async (req, res) => {
 });
 
 
-// Route to handle admin reply with media upload
-import fs from 'fs';
 
-app.post('/api/admin/posts/:postId/reply', auth, upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video', maxCount: 1 }]), async (req, res) => {
+app.post('/api/admin/posts/:postId/reply', auth, async (req, res) => {
   console.log('Received admin reply request');
   console.log('Request params:', req.params);
   console.log('Request user:', req.user);
   console.log('Request body:', req.body);
-  console.log('Request files:', req.files);
 
   try {
     const { postId } = req.params;
     const adminId = req.user.id;
-    const description = req.body.description;
+    const { description, image, video } = req.body;
 
     if (!description) {
       return res.status(400).json({ message: 'Description is required' });
-    }
-
-    let imageBase64 = null;
-    let videoBase64 = null;
-
-    if (req.files) {
-      if (req.files.image && req.files.image.length > 0) {
-        const imageFile = req.files.image[0];
-        const imageData = fs.readFileSync(imageFile.path);
-        const imageMime = imageFile.mimetype;
-        imageBase64 = `data:${imageMime};base64,${imageData.toString('base64')}`;
-        // Optionally delete the file after reading
-        fs.unlinkSync(imageFile.path);
-      }
-      if (req.files.video && req.files.video.length > 0) {
-        const videoFile = req.files.video[0];
-        const videoData = fs.readFileSync(videoFile.path);
-        const videoMime = videoFile.mimetype;
-        videoBase64 = `data:${videoMime};base64,${videoData.toString('base64')}`;
-        // Optionally delete the file after reading
-        fs.unlinkSync(videoFile.path);
-      }
     }
 
     // Create new AdminPost document
@@ -275,8 +250,8 @@ app.post('/api/admin/posts/:postId/reply', auth, upload.fields([{ name: 'image',
       postId,
       adminId,
       description,
-      image: imageBase64,
-      video: videoBase64,
+      image: image || null,
+      video: video || null,
     });
 
     await newAdminPost.save();

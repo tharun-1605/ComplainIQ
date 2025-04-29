@@ -38,28 +38,72 @@ function CompletedComplaints() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 max-w-3xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Completed Complaints</h2>
+    <div className="min-h-screen bg-black text-white p-6 max-w-4xl mx-auto">
+      <h2 className="text-3xl font-extrabold mb-8 border-b border-gray-700 pb-3">Completed Complaints</h2>
       {completedComplaints.map((complaint) => (
-        <div key={complaint._id} className="bg-zinc-900 rounded-lg p-4 mb-6 shadow-lg">
-          <p className="mb-2">{complaint.content}</p>
+        <div
+          key={complaint._id}
+          className="bg-zinc-900 rounded-xl p-6 mb-8 shadow-xl hover:shadow-2xl transition-shadow duration-300"
+          aria-label="Completed complaint card"
+        >
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-lg font-semibold text-indigo-400">{complaint.content}</p>
+            {complaint.createdAt && (
+              <time
+                dateTime={complaint.createdAt}
+                className="text-sm text-gray-500 italic"
+                title={new Date(complaint.createdAt).toLocaleString()}
+              >
+                {new Date(complaint.createdAt).toLocaleDateString()}
+              </time>
+            )}
+          </div>
           {complaint.image && (
-            <img src={complaint.image} alt="Complaint" className="mb-2 rounded-lg max-h-64 object-cover" />
+            <img
+              src={complaint.image}
+              alt="Complaint visual"
+              className="mb-4 rounded-lg max-h-72 w-full object-cover border border-gray-700"
+            />
           )}
           {complaint.video && (
-            <video controls className="mb-2 rounded-lg max-h-64 w-full">
+            <video
+              controls
+              className="mb-4 rounded-lg max-h-72 w-full border border-gray-700"
+              aria-label="Complaint video"
+            >
               <source src={complaint.video} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           )}
-          <div className="mt-4 bg-gray-800 p-3 rounded">
-            <h3 className="font-semibold mb-2">Admin Reply:</h3>
-            <p>{complaint.adminReply?.description || 'No reply yet.'}</p>
+          <div className="mt-6 bg-gray-800 p-4 rounded-lg border border-gray-700">
+            <h3 className="font-semibold mb-3 text-lg text-indigo-300 flex items-center">
+              <svg
+                className="w-5 h-5 mr-2 text-green-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Admin Reply:
+            </h3>
+            <p className="text-gray-300">{complaint.adminReply?.description || 'No reply yet.'}</p>
             {complaint.adminReply?.image && (
-              <img src={complaint.adminReply.image} alt="Admin Reply" className="mt-2 rounded-lg max-h-64 object-cover" />
+              <img
+                src={complaint.adminReply.image}
+                alt="Admin reply visual"
+                className="mt-4 rounded-lg max-h-72 w-full object-cover border border-gray-700"
+              />
             )}
             {complaint.adminReply?.video && (
-              <video controls className="mt-2 rounded-lg max-h-64 w-full">
+              <video
+                controls
+                className="mt-4 rounded-lg max-h-72 w-full border border-gray-700"
+                aria-label="Admin reply video"
+              >
                 <source src={complaint.adminReply.video} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
