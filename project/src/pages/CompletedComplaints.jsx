@@ -4,6 +4,7 @@ function CompletedComplaints() {
   const [completedComplaints, setCompletedComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedImage, setExpandedImage] = useState(null);
 
   useEffect(() => {
     const fetchCompletedComplaints = async () => {
@@ -62,7 +63,8 @@ function CompletedComplaints() {
             <img
               src={complaint.image}
               alt="Complaint visual"
-              className="mb-4 rounded-lg max-h-72 w-full object-cover border border-gray-700"
+              className="mb-4 rounded-lg max-h-72 w-full object-cover border border-gray-700 cursor-pointer"
+              onClick={() => setExpandedImage(complaint.image)}
             />
           )}
           {complaint.video && (
@@ -95,7 +97,8 @@ function CompletedComplaints() {
               <img
                 src={complaint.adminReply.image}
                 alt="Admin reply visual"
-                className="mt-4 rounded-lg max-h-72 w-full object-cover border border-gray-700"
+                className="mt-4 rounded-lg max-h-72 w-full object-cover border border-gray-700 cursor-pointer"
+                onClick={() => setExpandedImage(complaint.adminReply.image)}
               />
             )}
             {complaint.adminReply?.video && (
@@ -111,6 +114,28 @@ function CompletedComplaints() {
           </div>
         </div>
       ))}
+
+      {expandedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 cursor-pointer"
+          onClick={() => setExpandedImage(null)}
+          aria-label="Expanded image modal"
+        >
+          <img
+            src={expandedImage}
+            alt="Expanded visual"
+            className="max-h-full max-w-full rounded-lg shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            className="absolute top-4 right-4 text-white text-3xl font-bold"
+            onClick={() => setExpandedImage(null)}
+            aria-label="Close expanded image"
+          >
+            &times;
+          </button>
+        </div>
+      )}
     </div>
   );
 }
