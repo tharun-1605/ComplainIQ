@@ -31,7 +31,7 @@ function UserDashboard() {
         return;
       }
       try {
-        const response = await fetch('http://localhost:5000/api/user/posts', {
+        const response = await fetch('https://public-complient-websitw.onrender.com/api/user/posts', {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) throw new Error('Failed to fetch posts.');
@@ -48,7 +48,7 @@ function UserDashboard() {
 
   const handleLike = async (postId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, { 
+      const response = await fetch(`https://public-complient-websitw.onrender.com/api/posts/${postId}/like`, { 
         method: 'POST',
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
@@ -68,7 +68,7 @@ function UserDashboard() {
 
   const handleCommentSubmit = async (postId, commentText) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}/comment`, {
+      const response = await fetch(`https://public-complient-websitw.onrender.com/api/posts/${postId}/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
