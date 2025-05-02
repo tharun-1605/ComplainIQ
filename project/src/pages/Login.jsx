@@ -116,7 +116,7 @@ function Login() {
         </form>
 
         <p className="text-center text-black mt-4">
-        Demo login credentials: <strong>Email:user@gmail.com,pass:123456</strong>
+        Demo login credentials: <strong>Email:user@gmail.com,pass:123456       </strong>
           Don't have an account?{' '}
           <Link to="/register" className="text-black-200 font-semibold hover:underline transition-all">
             Register
