@@ -25,6 +25,7 @@ function AdminDashboard() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortOption, setSortOption] = useState('Newest');
+  const [categoryFilter, setCategoryFilter] = useState('All');
   const [showComments, setShowComments] = useState({});
   const [mapVisible, setMapVisible] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -67,6 +68,10 @@ function AdminDashboard() {
       filtered = filtered.filter(c => c.status === statusFilter);
     }
 
+    if (categoryFilter !== 'All') {
+      filtered = filtered.filter(c => c.category === categoryFilter);
+    }
+
     if (sortOption === 'Most Liked') {
       filtered.sort((a, b) => b.likes - a.likes);
     } else {
@@ -74,7 +79,7 @@ function AdminDashboard() {
     }
 
     setFilteredComplaints(filtered);
-  }, [search, statusFilter, sortOption, complaints]);
+  }, [search, statusFilter, sortOption, categoryFilter, complaints]);
 
   // Initialize map
   useEffect(() => {
@@ -334,29 +339,45 @@ function AdminDashboard() {
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-gray-200 dark:border-gray-700">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                  <select 
-                    value={statusFilter} 
-                    onChange={(e) => setStatusFilter(e.target.value)} 
-                    className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="All">All Statuses</option>
-                    <option value="Pending">Pending</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
-                  <select 
-                    value={sortOption} 
-                    onChange={(e) => setSortOption(e.target.value)} 
-                    className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="Newest">Newest First</option>
-                    <option value="Most Liked">Most Liked</option>
-                  </select>
-                </div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                <select 
+                  value={statusFilter} 
+                  onChange={(e) => setStatusFilter(e.target.value)} 
+                  className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="Pending">Pending</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="All">All Categories</option>
+                  <option value="Electric">Electric</option>
+                  <option value="Water">Water</option>
+                  <option value="Social Problem">Social Problem</option>
+                  <option value="Drainage">Drainage</option>
+                  <option value="Air">Air</option>
+                  <option value="Others">Others</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
+                <select 
+                  value={sortOption} 
+                  onChange={(e) => setSortOption(e.target.value)} 
+                  className="w-full p-2.5 border rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="Newest">Newest First</option>
+                  <option value="Most Liked">Most Liked</option>
+                </select>
+              </div>
               </div>
             </motion.div>
           )}
@@ -420,32 +441,33 @@ function AdminDashboard() {
 
                 {/* Complaint Content */}
                 <div className="mt-4">
-                  <h3 className="font-medium text-gray-900 dark:text-white">{complaint.title || 'No title'}</h3>
-                  <p className="mt-1 text-gray-600 dark:text-gray-300">{complaint.content}</p>
-                  
-                  {/* Media */}
-                  {complaint.image && (
-                    <div className="mt-3 rounded-lg overflow-hidden">
-                      <img 
-                        src={complaint.image} 
-                        alt="Complaint" 
-                        className="w-full h-auto max-h-60 object-cover rounded-lg hover:scale-[1.02] transition-transform duration-300 cursor-zoom-in"
-                        onClick={() => setFullImageUrl(complaint.image)}
-                      />
-                    </div>
-                  )}
-                  {complaint.video && (
-                    <div className="mt-3 rounded-lg overflow-hidden">
-                      <video 
-                        controls 
-                        className="w-full rounded-lg"
-                        poster={complaint.image}
-                      >
-                        <source src={complaint.video} type="video/mp4" />
-                        Your browser does not support the video tag.
-                      </video>
-                    </div>
-                  )}
+                <h3 className="font-medium text-gray-900 dark:text-white">{complaint.title || 'No title'}</h3>
+                <p className="mt-1 text-gray-600 dark:text-gray-300">{complaint.content}</p>
+                <p className="mt-1 text-sm font-semibold text-blue-600 dark:text-blue-400">Category: {complaint.category || 'N/A'}</p>
+                
+                {/* Media */}
+                {complaint.image && (
+                  <div className="mt-3 rounded-lg overflow-hidden">
+                    <img 
+                      src={complaint.image} 
+                      alt="Complaint" 
+                      className="w-full h-auto max-h-60 object-cover rounded-lg hover:scale-[1.02] transition-transform duration-300 cursor-zoom-in"
+                      onClick={() => setFullImageUrl(complaint.image)}
+                    />
+                  </div>
+                )}
+                {complaint.video && (
+                  <div className="mt-3 rounded-lg overflow-hidden">
+                    <video 
+                      controls 
+                      className="w-full rounded-lg"
+                      poster={complaint.image}
+                    >
+                      <source src={complaint.video} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                )}
                 </div>
 
                 {/* Complaint Footer */}

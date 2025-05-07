@@ -49,6 +49,11 @@ const postSchema = new mongoose.Schema({
         type: String,
         enum: ['Pending', 'Resolved', 'Rejected', 'Completed'], // Possible statuses
         default: 'Pending' // Default status
+    },
+    category: {
+        type: String,
+        enum: ['Electric', 'Water', 'Social Problem', 'Drainage', 'Air', 'Others'],
+        default: 'Others'
     }
 }, { timestamps: true });
 

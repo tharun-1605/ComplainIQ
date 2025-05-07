@@ -15,6 +15,7 @@ function CreatePost() {
     latitude: null,
     longitude: null,
     useCurrentLocation: false,
+    category: 'Others',
   });
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState(null);
@@ -123,6 +124,7 @@ function CreatePost() {
         content: formData.content,
         image: imageBase64,
         video: videoBase64,
+        category: formData.category,
       };
 
       if (formData.useCurrentLocation && formData.latitude && formData.longitude) {
@@ -214,6 +216,24 @@ function CreatePost() {
             transition={{ delay: 0.7 }}
             className="space-y-4"
           >
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Category
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="w-full p-3 mt-1 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+              >
+                <option value="Electric">Electric</option>
+                <option value="Water">Water</option>
+                <option value="Social Problem">Social Problem</option>
+                <option value="Drainage">Drainage</option>
+                <option value="Air">Air</option>
+                <option value="Others">Others</option>
+              </select>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Upload Image <span className="text-gray-500 text-xs">(optional)</span>

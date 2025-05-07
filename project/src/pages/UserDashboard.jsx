@@ -299,6 +299,7 @@ function UserDashboard() {
 
                 <div className="px-4 pb-3">
                   <p className="text-gray-200">{post.content}</p>
+                  <p className="mt-1 text-sm font-semibold text-blue-400">Category: {post.category || 'N/A'}</p>
                 </div>
 
                 {(post.image || post.video) && (
