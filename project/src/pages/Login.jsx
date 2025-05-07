@@ -53,24 +53,24 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-gray-600 px-6">
-      <div className="bg-white bg-opacity-20 backdrop-blur-lg shadow-2xl rounded-2xl p-8 max-w-md w-full transition-all transform hover:scale-105">
-        <h2 className="text-center text-3xl font-extrabold text-white animate-fade-in">Welcome Back to ComplainIQ</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-500 to-pink-500 px-4 sm:px-6 lg:px-8">
+      <div className="relative bg-white/20 backdrop-blur-lg shadow-xl rounded-xl p-10 w-full max-w-md animate-fade-in-up">
+        <h2 className="text-center text-3xl font-bold text-white mb-2">Welcome to ComplainIQ</h2>
         <p className="text-center text-white mb-6">Sign in to your account</p>
 
-        <div className="flex justify-center mb-6 bg-white bg-opacity-30 rounded-lg transition-all">
+        <div className="flex mb-6 overflow-hidden rounded-lg border border-white/30">
           <button
             onClick={() => setIsAdmin(false)}
-            className={`w-1/2 py-2 text-sm font-medium rounded-l-lg transition ${
-              !isAdmin ? 'bg-blue-600 text-white shadow-lg' : 'bg-transparent text-white'
+            className={`w-1/2 py-2 text-sm font-semibold transition-all ${
+              !isAdmin ? 'bg-white text-blue-700 shadow-inner' : 'text-white hover:bg-white/10'
             }`}
           >
             User
           </button>
           <button
             onClick={() => setIsAdmin(true)}
-            className={`w-1/2 py-2 text-sm font-medium rounded-r-lg transition ${
-              isAdmin ? 'bg-blue-600 text-white shadow-lg' : 'bg-transparent text-white'
+            className={`w-1/2 py-2 text-sm font-semibold transition-all ${
+              isAdmin ? 'bg-white text-blue-700 shadow-inner' : 'text-white hover:bg-white/10'
             }`}
           >
             Admin
@@ -79,49 +79,58 @@ function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-white">Email Address</label>
+            <label className="block text-white text-sm font-medium mb-1">Email Address</label>
             <input
               type="email"
               name="email"
-              className="w-full p-3 bg-transparent border border-white rounded-lg text-white placeholder-white focus:ring-2 focus:ring-blue-300 outline-none transition-all hover:shadow-md"
-              placeholder="Enter your email"
+              className="w-full p-3 bg-white/10 text-white placeholder-white border border-white/30 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
+              placeholder="you@example.com"
               value={formData.email}
               onChange={handleInputChange}
               required
             />
-            {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
+            {errors.email && <p className="text-red-300 text-xs mt-1">{errors.email}</p>}
           </div>
           <div>
-            <label className="block text-white">Password</label>
+            <label className="block text-white text-sm font-medium mb-1">Password</label>
             <input
               type="password"
               name="password"
-              className="w-full p-3 bg-transparent border border-white rounded-lg text-white placeholder-white focus:ring-2 focus:ring-blue-300 outline-none transition-all hover:shadow-md"
-              placeholder="Enter your password"
+              className="w-full p-3 bg-white/10 text-white placeholder-white border border-white/30 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
+              placeholder="••••••••"
               value={formData.password}
               onChange={handleInputChange}
               required
             />
-            {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
+            {errors.password && <p className="text-red-300 text-xs mt-1">{errors.password}</p>}
           </div>
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full py-3 mt-4 text-blue-700 font-semibold rounded-lg shadow-md transition-all ${
-              isSubmitting ? 'bg-gray-300 cursor-not-allowed' : 'bg-white hover:bg-blue-100'
+            className={`w-full py-3 mt-2 rounded-lg font-semibold transition-all ${
+              isSubmitting
+                ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                : 'bg-white text-blue-700 hover:bg-blue-100'
             }`}
           >
             {isSubmitting ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <p className="text-center text-black mt-4">
-        Demo login credentials: <strong>Email:user1@gmail.com,pass:123456       </strong>
-          Don't have an account?{' '}
-          <Link to="/register" className="text-black-200 font-semibold hover:underline transition-all">
-            Register
-          </Link>
-        </p>
+        <div className="mt-6 text-center text-sm text-white/80">
+          <p>
+            Demo credentials: <strong>user1@gmail.com / 123456</strong>
+          </p>
+          <p className="mt-2">
+            Don’t have an account?{' '}
+            <Link
+              to="/register"
+              className="font-medium text-white hover:underline transition"
+            >
+              Register
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
