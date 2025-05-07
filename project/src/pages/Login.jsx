@@ -1,13 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function Login() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = "Login | ComplainIQ";
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -52,86 +58,213 @@ function Login() {
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-500 to-pink-500 px-4 sm:px-6 lg:px-8">
-      <div className="relative bg-white/20 backdrop-blur-lg shadow-xl rounded-xl p-10 w-full max-w-md animate-fade-in-up">
-        <h2 className="text-center text-3xl font-bold text-white mb-2">Welcome to ComplainIQ</h2>
-        <p className="text-center text-white mb-6">Sign in to your account</p>
+  // Gradient colors for the background
+  const gradientColors = isAdmin 
+    ? 'from-indigo-600 to-purple-800' 
+    : 'from-blue-600 to-teal-500';
 
-        <div className="flex mb-6 overflow-hidden rounded-lg border border-white/30">
+  return (
+    <div className={`min-h-screen flex items-center justify-center bg-gradient-to-br ${gradientColors} px-6 transition-colors duration-500`}>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="bg-white bg-opacity-10 backdrop-blur-lg shadow-2xl rounded-2xl p-8 max-w-md w-full border border-white border-opacity-20"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="text-center mb-8">
+          <motion.h2 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-3xl font-bold text-white mb-2"
+          >
+            Welcome to <span className="text-blue-200">ComplainIQ</span>
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-blue-100"
+          >
+            {isAdmin ? 'Administrator Access' : 'User Portal'}
+          </motion.p>
+        </div>
+
+        <motion.div 
+          className="flex justify-center mb-8 bg-white bg-opacity-20 rounded-xl overflow-hidden shadow-inner"
+          whileHover={{ scale: 1.02 }}
+        >
           <button
             onClick={() => setIsAdmin(false)}
-            className={`w-1/2 py-2 text-sm font-semibold transition-all ${
-              !isAdmin ? 'bg-white text-blue-700 shadow-inner' : 'text-white hover:bg-white/10'
+            className={`w-1/2 py-3 text-sm font-medium transition-all duration-300 ${
+              !isAdmin 
+                ? 'bg-white text-blue-600 font-semibold' 
+                : 'bg-transparent text-white hover:bg-white hover:bg-opacity-10'
             }`}
           >
-            User
+            User Login
           </button>
           <button
             onClick={() => setIsAdmin(true)}
-            className={`w-1/2 py-2 text-sm font-semibold transition-all ${
-              isAdmin ? 'bg-white text-blue-700 shadow-inner' : 'text-white hover:bg-white/10'
+            className={`w-1/2 py-3 text-sm font-medium transition-all duration-300 ${
+              isAdmin 
+                ? 'bg-white text-indigo-600 font-semibold' 
+                : 'bg-transparent text-white hover:bg-white hover:bg-opacity-10'
             }`}
           >
-            Admin
+            Admin Login
           </button>
-        </div>
+        </motion.div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-white text-sm font-medium mb-1">Email Address</label>
-            <input
-              type="email"
-              name="email"
-              className="w-full p-3 bg-white/10 text-white placeholder-white border border-white/30 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
-              placeholder="you@example.com"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-            />
-            {errors.email && <p className="text-red-300 text-xs mt-1">{errors.email}</p>}
-          </div>
-          <div>
-            <label className="block text-white text-sm font-medium mb-1">Password</label>
-            <input
-              type="password"
-              name="password"
-              className="w-full p-3 bg-white/10 text-white placeholder-white border border-white/30 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleInputChange}
-              required
-            />
-            {errors.password && <p className="text-red-300 text-xs mt-1">{errors.password}</p>}
-          </div>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={`w-full py-3 mt-2 rounded-lg font-semibold transition-all ${
-              isSubmitting
-                ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                : 'bg-white text-blue-700 hover:bg-blue-100'
-            }`}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
           >
-            {isSubmitting ? 'Signing in...' : 'Sign In'}
-          </button>
+            <label className="block text-sm font-medium text-blue-100 mb-2">Email Address</label>
+            <div className="relative">
+              <input
+                type="email"
+                name="email"
+                className="w-full p-4 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-transparent outline-none transition-all duration-300 hover:bg-opacity-20"
+                placeholder="your@email.com"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+              />
+              <div className="absolute right-3 top-4 text-blue-200">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+            <AnimatePresence>
+              {errors.email && (
+                <motion.p 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="text-red-300 text-xs mt-1"
+                >
+                  {errors.email}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <label className="block text-sm font-medium text-blue-100 mb-2">Password</label>
+            <div className="relative">
+              <input
+                type="password"
+                name="password"
+                className="w-full p-4 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-lg text-white placeholder-blue-200 focus:ring-2 focus:ring-blue-300 focus:border-transparent outline-none transition-all duration-300 hover:bg-opacity-20"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+              />
+              <div className="absolute right-3 top-4 text-blue-200">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+            </div>
+            <AnimatePresence>
+              {errors.password && (
+                <motion.p 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="text-red-300 text-xs mt-1"
+                >
+                  {errors.password}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="pt-2"
+          >
+            <motion.button
+              type="submit"
+              disabled={isSubmitting}
+              whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+              whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+              className={`w-full py-4 px-6 rounded-xl font-semibold text-lg shadow-lg transition-all duration-300 flex items-center justify-center ${
+                isSubmitting 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : isAdmin 
+                    ? 'bg-indigo-500 hover:bg-indigo-600 text-white' 
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+              }`}
+            >
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                </>
+              )}
+            </motion.button>
+          </motion.div>
         </form>
 
-        <div className="mt-6 text-center text-sm text-white/80">
-          <p>
-            Demo credentials: <strong>user1@gmail.com / 123456</strong>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+          className="mt-6 text-center"
+        >
+          <p className="text-blue-100 text-sm mb-3">
+            Demo credentials: <span className="font-mono bg-black bg-opacity-20 px-2 py-1 rounded">user1@gmail.com</span> / <span className="font-mono bg-black bg-opacity-20 px-2 py-1 rounded">123456</span>
           </p>
-          <p className="mt-2">
-            Don’t have an account?{' '}
-            <Link
-              to="/register"
-              className="font-medium text-white hover:underline transition"
+          <p className="text-blue-100">
+            Don't have an account?{' '}
+            <Link 
+              to="/register" 
+              className="text-white font-semibold hover:underline transition-all hover:text-blue-200"
             >
-              Register
+              Register here
             </Link>
           </p>
-        </div>
-      </div>
+        </motion.div>
+
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="absolute -bottom-4 -right-4 bg-white bg-opacity-20 backdrop-blur-md rounded-full p-3 shadow-lg"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }
