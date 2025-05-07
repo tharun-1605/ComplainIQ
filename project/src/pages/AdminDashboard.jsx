@@ -268,6 +268,15 @@ function AdminDashboard() {
           <ArrowDownTrayIcon className="h-5 w-5" />
           Export as CSV
         </motion.button>
+        <button
+          onClick={() => {
+            localStorage.removeItem('token');
+            window.location.href = '/';
+          }}
+          className="mt-4 md:mt-0 ml-2 flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow-md transition-all"
+        >
+          Logout
+        </button>
       </motion.header>
 
       {/* Stats Cards */}
