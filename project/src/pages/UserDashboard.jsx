@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   HeartIcon,
   ChatBubbleLeftIcon,
@@ -8,6 +9,8 @@ import {
   UserIcon,
   XMarkIcon,
   FlagIcon,
+  MagnifyingGlassIcon,
+  Bars3Icon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 
@@ -20,7 +23,16 @@ function UserDashboard() {
   const [showComments, setShowComments] = useState({});
   const [likedComments, setLikedComments] = useState({});
   const [zoomImage, setZoomImage] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth > 768);
+  const [newComment, setNewComment] = useState({});
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSidebarOpen(window.innerWidth > 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -45,7 +57,6 @@ function UserDashboard() {
     };
     fetchPosts();
   }, []);
-
   const handleLike = async (postId) => {
     try {
       const response = await fetch(`https://public-complient-websitw.onrender.com/api/posts/${postId}/like`, { 
@@ -67,6 +78,7 @@ function UserDashboard() {
   };
 
   const handleCommentSubmit = async (postId, commentText) => {
+    if (!commentText.trim()) return;
     try {
       const response = await fetch(`https://public-complient-websitw.onrender.com/api/posts/${postId}/comment`, {
         method: 'POST',
@@ -85,6 +97,7 @@ function UserDashboard() {
             : post
         )
       );
+      setNewComment({...newComment, [postId]: ''});
     } catch (error) {
       console.error(error.message);
     }
@@ -106,172 +119,354 @@ function UserDashboard() {
   }, [theme]);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-black text-white">
-      {/* Sidebar */}
-      <aside className={`transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-0'} h-auto md:h-screen sticky top-0 border-r border-zinc-800 bg-zinc-900 p-4 flex flex-col gap-6`}>
-        {isSidebarOpen && (
-          <>
-            <h1 className="text-2xl font-bold text-center">ComplainIQ</h1>
-            <div className="flex justify-between items-center">
-              {/* <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-white">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-              </button> */}
-            </div>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="Search Complaints..."
-                  className="w-full px-2 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Link to="/" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
-                <HomeIcon className="w-6 h-6" />
-                <span>Home</span>
-              </Link>
-              <Link to="/create-post" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
-                <PlusCircleIcon className="w-6 h-6" />
-                <span>Create Post</span>
-              </Link>
-              <Link to="/profile" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
-                <UserIcon className="w-6 h-6" />
-                <span>Profile</span>
-              </Link>
-              <Link to="/completed-complaints" className="flex items-center gap-3 p-2 rounded hover:bg-zinc-800">
-                <FlagIcon className="w-6 h-6" />
-                <span>Completed Complaints</span>
-              </Link>
-            </div>
-          </>
-        )}
-      </aside>
+    <div className="flex flex-col md:flex-row min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white relative">
+      {/* Mobile Sidebar Toggle */}
+      <button 
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="fixed top-4 left-4 z-50 md:hidden p-2 rounded-full bg-gray-800/80 backdrop-blur-sm"
+      >
+        <Bars3Icon className="w-6 h-6 text-white" />
+      </button>
 
-      {/* Three-Dot Icon */}
-      <div className="absolute top-4 left-4">
-        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-white">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-          </svg>
-        </button>
-      </div>
+      {/* Sidebar */}
+      <motion.aside 
+        initial={false}
+        animate={{ 
+          x: window.innerWidth <= 768 ? (isSidebarOpen ? 0 : -300) : 0,
+          opacity: isSidebarOpen ? 1 : (window.innerWidth <= 768 ? 0 : 1)
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className={`fixed md:sticky top-0 left-0 z-40 h-screen w-64 border-r border-gray-700/50 bg-gray-800/30 backdrop-blur-lg p-4 flex flex-col gap-6`}
+      >
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="flex flex-col h-full"
+        >
+          <h1 className="text-2xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-500 py-4">
+            ComplainIQ
+          </h1>
+          
+          <div className="relative mb-6">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search Complaints..."
+              className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-700/50 border border-gray-600/50 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <nav className="flex flex-col gap-2 flex-grow">
+            <Link 
+              to="/" 
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700/50 transition-colors duration-200"
+              onClick={() => window.innerWidth <= 768 && setIsSidebarOpen(false)}
+            >
+              <HomeIcon className="w-6 h-6 text-indigo-400" />
+              <span>Home</span>
+            </Link>
+            <Link 
+              to="/create-post" 
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700/50 transition-colors duration-200"
+              onClick={() => window.innerWidth <= 768 && setIsSidebarOpen(false)}
+            >
+              <PlusCircleIcon className="w-6 h-6 text-green-400" />
+              <span>Create Post</span>
+            </Link>
+            <Link 
+              to="/profile" 
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700/50 transition-colors duration-200"
+              onClick={() => window.innerWidth <= 768 && setIsSidebarOpen(false)}
+            >
+              <UserIcon className="w-6 h-6 text-blue-400" />
+              <span>Profile</span>
+            </Link>
+            <Link 
+              to="/completed-complaints" 
+              className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700/50 transition-colors duration-200"
+              onClick={() => window.innerWidth <= 768 && setIsSidebarOpen(false)}
+            >
+              <FlagIcon className="w-6 h-6 text-yellow-400" />
+              <span>Completed Complaints</span>
+            </Link>
+          </nav>
+          
+          <div className="mt-auto pt-4 border-t border-gray-700/50">
+            <div className="flex items-center gap-3 p-3 text-sm text-gray-400">
+              <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                <UserIcon className="w-4 h-4" />
+              </div>
+              <span>User Profile</span>
+            </div>
+          </div>
+        </motion.div>
+      </motion.aside>
+
+      {/* Overlay for mobile sidebar */}
+      <AnimatePresence>
+        {isSidebarOpen && window.innerWidth <= 768 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 z-30"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Main content */}
-      <main className="flex-1 max-w-2xl mx-auto p-6">
-        <header className="sticky top-0 z-10 bg-black p-4 border-b border-zinc-800 text-center">
-          <h2 className="text-xl font-semibold">Public Complaints</h2>
-        </header>
+      <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-0'} max-w-2xl mx-auto p-4 md:p-6`}>
+        <motion.header 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="sticky top-0 z-10 bg-gray-900/80 backdrop-blur-md p-4 rounded-xl mb-6 border border-gray-700/50 shadow-lg"
+        >
+          <h2 className="text-xl font-semibold text-center bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
+            Public Complaints
+          </h2>
+        </motion.header>
 
-        {error && <p className="text-red-500 text-center">{error}</p>}
+        {error && (
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-red-900/30 border border-red-700/50 rounded-xl p-4 mb-6 text-center"
+          >
+            <p className="text-red-300">{error}</p>
+          </motion.div>
+        )}
+        
         {loading ? (
-          <p className="text-center text-gray-400">Loading posts...</p>
+          <div className="flex flex-col items-center justify-center h-64">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+              className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full mb-4"
+            />
+            <p className="text-gray-400">Loading posts...</p>
+          </div>
         ) : posts.length === 0 ? (
-          <p className="text-center text-gray-400">No posts available.</p>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12"
+          >
+            <div className="w-24 h-24 mx-auto mb-4 text-gray-500">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <p className="text-gray-400 text-lg">No posts available</p>
+            <Link 
+              to="/create-post" 
+              className="mt-4 inline-block px-6 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors"
+            >
+              Create your first post
+            </Link>
+          </motion.div>
         ) : (
-          posts.map((post) => (
-            <div key={post._id} className="bg-zinc-900 rounded-lg mb-6 shadow-lg">
-              <div className="flex items-center gap-3 p-3">
-                <img
-                  src={post.user?.avatar || '/path/to/default/avatar.png'}
-                  alt={post.user?.name}
-                  className="w-10 h-10 rounded-full border object-cover"
-                />
-                <div>
-                  <p className="font-semibold">{post.user?.name || 'Unknown'}</p>
-                  <p className="text-xs text-gray-400">{new Date(post.createdAt).toLocaleString()}</p>
-                  <p className="text-xs text-gray-400">
-                    Status: {post.status} | Likes: {post.likes} | Comments: {post.comments?.length || 0}
-                  </p>
-                </div>
-              </div>
-
-              {(post.image || post.video) && (
-                <div
-                  className="w-full overflow-hidden cursor-pointer"
-                  onDoubleClick={() => handleLike(post._id)}
-                  onClick={() => post.image && setZoomImage(post.image)}
-                >
-                  {post.image && (
-                  <img src={post.image} alt="Post" className="w-full object-cover max-h-[400px]" />
-                  )}
-                  {post.video && (
-                    <video controls className="w-full object-cover max-h-[400px]">
-                      <source src={post.video} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                  )}
-                </div>
-              )}
-
-              <div className="p-4">
-                <p className="mb-3 text-sm">{post.content}</p>
-                <div className="flex items-center justify-between">
-                  <button onClick={() => handleLike(post._id)} className="flex items-center gap-1">
-                    {post.isLiked ? (
-                      <HeartSolidIcon className="w-6 h-6 text-red-500" />
-                    ) : (
-                      <HeartIcon className="w-6 h-6 text-white" />
-                    )}
-                    <span className="text-sm">{post.likes}</span>
-                  </button>
-                  <button onClick={() => toggleComments(post._id)} className="flex items-center gap-1 text-white">
-                    <ChatBubbleLeftIcon className="w-5 h-5" />
-                    <span className="text-sm">Comments</span>
-                  </button>
+          <AnimatePresence>
+            {posts.map((post) => (
+              <motion.div
+                key={post._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-gray-800/50 backdrop-blur-sm rounded-xl mb-6 border border-gray-700/50 overflow-hidden shadow-lg hover:shadow-indigo-500/10 transition-shadow"
+              >
+                <div className="flex items-center gap-3 p-4">
+                  <div className="relative">
+                    <img
+                      src={post.user?.avatar || '/default-avatar.png'}
+                      alt={post.user?.name}
+                      className="w-10 h-10 rounded-full border-2 border-indigo-500/50 object-cover"
+                    />
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-800"></div>
+                  </div>
+                  <div>
+                    <p className="font-semibold">{post.user?.name || 'Unknown'}</p>
+                    <div className="flex gap-2 text-xs text-gray-400">
+                      <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                      <span>•</span>
+                      <span className="capitalize">{post.status}</span>
+                    </div>
+                  </div>
                 </div>
 
-                {showComments[post._id] && post.comments && (
-                  <div className="mt-3 max-h-40 overflow-y-auto pr-1 space-y-2 text-sm">
-                    {post.comments.map((comment) => (
-                      <div key={comment._id} className="flex justify-between items-center">
-                        <p>
-                          👤 <strong>{comment.author.username}:</strong> {comment.text}
-                        </p>
-                        <button onClick={() => toggleCommentLike(comment._id)}>
-                          {likedComments[comment._id] ? (
-                            <HeartSolidIcon className="w-4 h-4 text-red-500" />
-                          ) : (
-                            <HeartIcon className="w-4 h-4 text-white" />
-                          )}
+                <div className="px-4 pb-3">
+                  <p className="text-gray-200">{post.content}</p>
+                </div>
+
+                {(post.image || post.video) && (
+                  <div className="relative group">
+                    <div
+                      className="w-full overflow-hidden cursor-pointer"
+                      onDoubleClick={() => handleLike(post._id)}
+                      onClick={() => post.image && setZoomImage(post.image)}
+                    >
+                      {post.image && (
+                        <motion.img 
+                          src={post.image} 
+                          alt="Post" 
+                          className="w-full object-cover max-h-[500px]"
+                          whileHover={{ scale: 1.01 }}
+                        />
+                      )}
+                      {post.video && (
+                        <video controls className="w-full object-cover max-h-[500px] rounded-b-lg">
+                          <source src={post.video} type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      )}
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      {post.image && (
+                        <button 
+                          className="p-2 bg-black/50 rounded-full backdrop-blur-sm"
+                          onClick={() => setZoomImage(post.image)}
+                        >
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                          </svg>
                         </button>
-                      </div>
-                    ))}
+                      )}
+                    </div>
                   </div>
                 )}
 
-                <input
-                  type="text"
-                  placeholder="Add a comment..."
-                  className="w-full mt-2 px-3 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCommentSubmit(post._id, e.target.value);
-                      e.target.value = '';
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          ))
+                <div className="p-4 pt-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <motion.button 
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleLike(post._id)} 
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-700/50 hover:bg-gray-700 transition-colors"
+                    >
+                      {post.isLiked ? (
+                        <HeartSolidIcon className="w-5 h-5 text-red-500" />
+                      ) : (
+                        <HeartIcon className="w-5 h-5 text-gray-300" />
+                      )}
+                      <span className="text-sm">{post.likes}</span>
+                    </motion.button>
+                    
+                    <motion.button 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => toggleComments(post._id)} 
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-700/50 hover:bg-gray-700 transition-colors"
+                    >
+                      <ChatBubbleLeftIcon className="w-5 h-5 text-gray-300" />
+                      <span className="text-sm">{post.comments?.length || 0}</span>
+                    </motion.button>
+                  </div>
+
+                  <AnimatePresence>
+                    {showComments[post._id] && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="space-y-3 mb-3">
+                          {post.comments?.map((comment) => (
+                            <motion.div 
+                              key={comment._id}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="flex items-start gap-2 p-3 bg-gray-700/30 rounded-lg"
+                            >
+                              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-500/10 flex items-center justify-center text-xs">
+                                👤
+                              </div>
+                              <div className="flex-grow">
+                                <div className="flex justify-between items-start">
+                                  <span className="font-medium text-sm">{comment.author.username}</span>
+                                  <button 
+                                    onClick={() => toggleCommentLike(comment._id)}
+                                    className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                                  >
+                                    {likedComments[comment._id] ? 'Liked' : 'Like'}
+                                  </button>
+                                </div>
+                                <p className="text-sm text-gray-300 mt-1">{comment.text}</p>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Add a comment..."
+                      className="flex-grow px-4 py-2 rounded-full bg-gray-700/50 border border-gray-600/50 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                      value={newComment[post._id] || ''}
+                      onChange={(e) => setNewComment({...newComment, [post._id]: e.target.value})}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleCommentSubmit(post._id, e.target.value);
+                        }
+                      }}
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => handleCommentSubmit(post._id, newComment[post._id])}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-full transition-colors text-sm"
+                      disabled={!newComment[post._id]?.trim()}
+                    >
+                      Post
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         )}
       </main>
 
-      {zoomImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
-          onClick={() => setZoomImage(null)}
-        >
-          <div className="relative max-w-3xl w-full">
-            <XMarkIcon
-              className="absolute top-4 right-4 w-6 h-6 text-white cursor-pointer z-10"
-              onClick={() => setZoomImage(null)}
-            />
-            <img src={zoomImage} alt="Zoomed" className="w-full max-h-[90vh] object-contain rounded-xl shadow-xl" />
-          </div>
-        </div>
-      )}
+      {/* Image Zoom Modal */}
+      <AnimatePresence>
+        {zoomImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+            onClick={() => setZoomImage(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="relative max-w-4xl w-full"
+            >
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="absolute top-2 right-2 z-10 p-2 bg-gray-800/80 hover:bg-gray-700 rounded-full backdrop-blur-sm"
+                onClick={() => setZoomImage(null)}
+                aria-label="Close zoomed image"
+              >
+                <XMarkIcon className="w-6 h-6 text-white" />
+              </motion.button>
+              <img 
+                src={zoomImage} 
+                alt="Zoomed" 
+                className="w-full max-h-[90vh] object-contain rounded-xl shadow-xl"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
