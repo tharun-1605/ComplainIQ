@@ -1,4 +1,4 @@
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import '@vercel/speed-insights/express';
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
