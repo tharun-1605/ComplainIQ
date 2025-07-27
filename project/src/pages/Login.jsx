@@ -80,7 +80,7 @@ function Login() {
             transition={{ delay: 0.2 }}
             className="text-3xl font-bold text-white mb-2"
           >
-            Welcome to <span className="text-blue-200">ComplainIQ</span>
+            Welcome to <span className="text-blue-200">ComplainI</span>
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0 }}
