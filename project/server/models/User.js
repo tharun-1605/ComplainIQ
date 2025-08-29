@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: false // Optional field
     },
+    location: { // Field for user location
+        type: String,
+        required: false // Optional field
+    },
     totalLikes: { // Existing field for total likes
         type: Number,
         default: 0 // Initialize to 0

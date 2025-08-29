@@ -49,7 +49,7 @@ app.post('/api/register', upload.single('profileImage'), async (req, res) => {
     try {
 console.log('Received registration data:', req.body); // Log the incoming data
 console.log('Profile image path:', req.file ? req.file.path : 'No file uploaded'); // Log the profile image path
-        const { username, email, bio } = req.body;
+        const { username, email, bio, location } = req.body;
         const password = req.body.password; // Access password from req.body
         const profileImage = req.file ? req.file.path : null; // Handle profile image
 
@@ -64,7 +64,7 @@ console.log('Profile image path:', req.file ? req.file.path : 'No file uploaded'
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ username, email, password: hashedPassword, bio, profileImage }); // Include bio and profileImage
+        const user = new User({ username, email, password: hashedPassword, bio, location, profileImage }); // Include bio and profileImage
         await user.save();
 
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
@@ -90,7 +90,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
-        res.json({ token, user: { id: user._id, username: user.username, email, role: user.role, bio: user.bio } });
+        res.json({ token, user: { id: user._id, username: user.username, email, role: user.role, bio: user.bio, location: user.location } });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }
@@ -112,7 +112,7 @@ app.get('/api/profile', auth, async (req, res) => {
 
 app.put('/api/profile', auth, async (req, res) => {
     try {
-        const { username, email, bio } = req.body;
+        const { username, email, bio, location } = req.body;
         const user = await User.findById(req.user.id);
 
         if (!user) {
@@ -127,6 +127,9 @@ app.put('/api/profile', auth, async (req, res) => {
         }
         if (bio !== undefined) {
             user.bio = bio;
+        }
+        if (location !== undefined) {
+            user.location = location;
         }
 
         const updatedUser = await user.save();
