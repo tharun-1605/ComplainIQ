@@ -90,7 +90,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
-        res.json({ token, user: { id: user._id, username: user.username, email, role: user.role } });
+        res.json({ token, user: { id: user._id, username: user.username, email, role: user.role, bio: user.bio } });
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }
@@ -101,6 +101,26 @@ app.get('/api/profile', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         console.log('User profile fetched:', user);
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+app.put('/api/profile', auth, async (req, res) => {
+    try {
+        const { username, email, bio } = req.body;
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.username = username || user.username;
+        user.email = email || user.email;
+        user.bio = bio || user.bio;
+
+        await user.save();
         res.json(user);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
