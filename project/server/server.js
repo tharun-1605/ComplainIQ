@@ -100,6 +100,9 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/profile', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
+        if (user && !user.bio) {
+            user.bio = 'No bio available';
+        }
         console.log('User profile fetched:', user);
         res.json(user);
     } catch (error) {
