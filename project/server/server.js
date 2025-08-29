@@ -119,13 +119,20 @@ app.put('/api/profile', auth, async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        user.username = username || user.username;
-        user.email = email || user.email;
-        user.bio = bio || user.bio;
+        if (username !== undefined) {
+            user.username = username;
+        }
+        if (email !== undefined) {
+            user.email = email;
+        }
+        if (bio !== undefined) {
+            user.bio = bio;
+        }
 
-        await user.save();
-        res.json(user);
+        const updatedUser = await user.save();
+        res.json(updatedUser);
     } catch (error) {
+        console.error('Error updating profile:', error);
         res.status(500).json({ message: 'Server error' });
     }
 });
