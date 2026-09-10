@@ -35,10 +35,18 @@ const seedDemoUsers = async () => {
 };
 
 const connectDB = async () => {
-    const primaryUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/complient';
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER || process.env.VERCEL;
+    const atlasUri = process.env.MONGODB_URI && process.env.MONGODB_URI.includes('mongodb+srv') 
+        ? process.env.MONGODB_URI 
+        : (process.env.ATLAS_MONGODB_URI || 'mongodb+srv://Tharun:tharun123@cluster.x8wyt2y.mongodb.net/complient');
+
+    const primaryUri = isProduction 
+        ? atlasUri 
+        : (process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/complient');
+
     try {
         await mongoose.connect(primaryUri);
-        console.log('MongoDB connected successfully');
+        console.log('MongoDB connected successfully to:', primaryUri.includes('mongodb+srv') ? 'MongoDB Atlas Cloud' : 'Local MongoDB');
         await seedDemoUsers();
     } catch (error) {
         console.error('Primary MongoDB connection error:', error.message);
