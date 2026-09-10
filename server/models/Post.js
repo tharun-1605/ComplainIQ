@@ -2,11 +2,11 @@ import mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
     image: {
-        type: String, // Change to Mixed type for GridFS
+        type: String,
         required: false
     },
     video: {
-        type: mongoose.Schema.Types.Mixed, // Changed to Mixed type for better handling
+        type: mongoose.Schema.Types.Mixed,
         required: false
     },
     comments: [{
@@ -18,6 +18,10 @@ const postSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
         }
     }],
     likes: {
@@ -26,7 +30,8 @@ const postSchema = new mongoose.Schema({
     },
     title: {
         type: String,
-        required: true
+        required: false,
+        default: 'Civic Complaint'
     },
     content: {
         type: String,
@@ -45,14 +50,13 @@ const postSchema = new mongoose.Schema({
         type: Number,
         required: false
     },
-    status: { // Adding status field
+    status: {
         type: String,
-        enum: ['Pending', 'Resolved', 'Rejected', 'Completed'], // Possible statuses
-        default: 'Pending' // Default status
+        enum: ['Pending', 'Resolved', 'Rejected', 'Completed'],
+        default: 'Pending'
     },
     category: {
         type: String,
-        enum: ['Electric', 'Water', 'Social Problem', 'Drainage', 'Air', 'Others'],
         default: 'Others'
     }
 }, { timestamps: true });
@@ -66,3 +70,4 @@ postSchema.statics.deletePost = async function(postId) {
 };
 
 export default mongoose.model('Post', postSchema);
+
