@@ -1,0 +1,29 @@
+:root {
+  --bg-color-dark: #0b0f19;
+  --surface-dark: #111827;
+  --card-dark: #1e293b;
+  --text-primary-dark: #f8fafc;
+  --text-secondary-dark: #94a3b8;
+  --accent-indigo: #6366f1;
+  --accent-purple: #a855f7;
+  --accent-emerald: #10b981;
+}
+
+body.dark {
+  background-color: var(--bg-color-dark);
+  color: var(--text-primary-dark);
+}
+
+body.light {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Glass & Card Surfaces */
+.bg-theme-surface {
+  background-color: rgba(17, 24, 39, 0.7);
+}
+
+.border-theme {
+  border-color: rgba(255, 255, 255, 0.08);
+}
