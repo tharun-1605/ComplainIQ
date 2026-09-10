@@ -200,9 +200,34 @@ function Login() {
 
           {/* Footer Info */}
           <div className="mt-8 pt-6 border-t border-white/10 text-center space-y-4">
-            <div className="bg-slate-900/60 rounded-xl p-3 border border-white/5">
-              <p className="text-xs text-gray-400 font-mono">
-                Demo User: <span className="text-indigo-400">user1@gmail.com</span> / <span className="text-indigo-400">123456</span>
+            <div className="bg-slate-900/60 rounded-2xl p-4 border border-white/10 space-y-2">
+              <p className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                ⚡ Quick Fill Demo Account
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAdmin(false);
+                    setFormData({ email: 'user1@gmail.com', password: '123456' });
+                  }}
+                  className="py-2 px-3 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-xs font-bold border border-blue-500/30 transition-all flex items-center justify-center gap-1"
+                >
+                  👤 Fill User
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAdmin(true);
+                    setFormData({ email: 'admin@gmail.com', password: '123456' });
+                  }}
+                  className="py-2 px-3 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-bold border border-purple-500/30 transition-all flex items-center justify-center gap-1"
+                >
+                  🛡️ Fill Admin
+                </button>
+              </div>
+              <p className="text-[11px] text-gray-400 font-mono pt-1">
+                Password for both: <span className="text-indigo-400 font-bold">123456</span>
               </p>
             </div>
             <p className="text-xs text-gray-400">
