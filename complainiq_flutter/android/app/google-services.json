@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "23625956464",
+    "project_id": "complainiq",
+    "storage_bucket": "complainiq.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:23625956464:android:7d108db2b770cd8aea88b5",
+        "android_client_info": {
+          "package_name": "com.complainiq.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpMYhFJn_3DShmWqIyZdaMmc1G4nwdst0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
