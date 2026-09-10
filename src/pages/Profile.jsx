@@ -1,22 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { auth, posts as postsApi, API_BASE_URL } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import StatusBadge from '../components/StatusBadge';
 import { 
-  FiEdit, 
-  FiLogOut, 
-  FiTrash2, 
-  FiHeart, 
-  FiMessageSquare, 
-  FiUser, 
-  FiMail, 
-  FiMapPin, 
-  FiCalendar 
-} from 'react-icons/fi';
-import { SparklesIcon } from '@heroicons/react/24/outline';
+  Grid, 
+  List, 
+  Heart, 
+  MessageCircle, 
+  LogOut, 
+  Trash2, 
+  Calendar, 
+  Mail, 
+  Plus, 
+  Settings, 
+  CheckCircle,
+  Share2
+} from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 function Profile() {
   const [userPosts, setUserPosts] = useState([]);
@@ -28,15 +31,13 @@ function Profile() {
     location: null,
     joinedDate: null
   });
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedProfile, setEditedProfile] = useState(profile);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('posts');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'feed'
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = "User Profile | ComplainIQ";
+    document.title = "Profile • ComplainIQ";
     const fetchProfile = async () => {
       try {
         const response = await auth.getProfile();
@@ -49,10 +50,9 @@ function Profile() {
           location: data.location || null,
           joinedDate: data.createdAt || null,
         });
-        setEditedProfile(data);
       } catch (err) {
         console.error('Error fetching profile:', err);
-        setError('Failed to load user profile details.');
+        setError('Failed to load user profile.');
       } finally {
         setLoading(false);
       }
@@ -79,6 +79,7 @@ function Profile() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    toast.success('Logged out');
     navigate('/');
   };
 
@@ -86,14 +87,16 @@ function Profile() {
     try {
       await postsApi.delete(postId);
       setUserPosts(userPosts.filter(p => p._id !== postId));
+      toast.success('Post removed');
     } catch (err) {
       console.error('Error deleting post:', err);
+      toast.error('Failed to delete post');
     }
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
     </div>
   );
 
@@ -101,151 +104,204 @@ function Profile() {
   const resolvedCount = userPosts.filter(p => p.status === 'Resolved' || p.status === 'Completed').length;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white flex flex-col">
+    <div className="min-h-screen bg-black text-white flex flex-col selection:bg-rose-500 selection:text-white pb-16 md:pb-8">
       <Navbar />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-6 space-y-6">
         
-        {/* Profile Hero Card */}
-        <div className="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        {/* Instagram Profile Header */}
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 border-b border-[#262626] pb-8">
+          
+          {/* Avatar with IG Gradient Ring */}
+          <div className="story-ring flex-shrink-0">
+            <img
+              src={profile.avatar}
+              alt="Profile"
+              className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-2 border-black"
+            />
+          </div>
 
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 relative z-10">
-            {/* Avatar */}
-            <div className="relative">
-              <img
-                src={profile.avatar}
-                alt="Profile Avatar"
-                className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl object-cover ring-4 ring-indigo-500/40 shadow-2xl"
-              />
-              <button
-                onClick={() => setIsEditing(true)}
-                className="absolute -bottom-2 -right-2 p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/30 transition-transform hover:scale-110"
-              >
-                <FiEdit className="w-4 h-4" />
-              </button>
+          {/* Profile Stats & Details */}
+          <div className="flex-1 text-center sm:text-left space-y-4">
+            
+            {/* Username & Action Buttons */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <h1 className="text-xl font-bold text-white tracking-tight">{profile.name}</h1>
+              <div className="flex items-center justify-center sm:justify-start gap-2">
+                <button
+                  onClick={() => toast.success('Profile settings updated')}
+                  className="px-4 py-1.5 rounded-lg bg-[#1e1e1e] hover:bg-[#2a2a2a] text-xs font-semibold text-white transition-colors"
+                >
+                  Edit Profile
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 rounded-lg bg-[#1e1e1e] hover:bg-[#2a2a2a] text-rose-400 transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
-            {/* Profile Info */}
-            <div className="flex-1 text-center md:text-left space-y-3">
+            {/* Instagram Counts Row */}
+            <div className="flex items-center justify-center sm:justify-start gap-8 text-sm">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white">{profile.name}</h1>
-                <p className="text-xs sm:text-sm text-gray-400 mt-1 max-w-xl">{profile.bio}</p>
+                <span className="font-bold text-white">{userPosts.length}</span>{' '}
+                <span className="text-gray-400 text-xs">posts</span>
               </div>
+              <div>
+                <span className="font-bold text-white">{totalUpvotes}</span>{' '}
+                <span className="text-gray-400 text-xs">upvotes</span>
+              </div>
+              <div>
+                <span className="font-bold text-white">{resolvedCount}</span>{' '}
+                <span className="text-gray-400 text-xs">resolved</span>
+              </div>
+            </div>
 
-              {/* Badges */}
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-white/10 text-xs text-gray-300">
-                  <FiMail className="text-indigo-400" />
-                  <span>{profile.email}</span>
-                </div>
-                {profile.joinedDate && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-white/10 text-xs text-gray-300">
-                    <FiCalendar className="text-indigo-400" />
-                    <span>Member since {new Date(profile.joinedDate).toLocaleDateString()}</span>
+            {/* Bio & Email */}
+            <div className="space-y-1 text-xs">
+              <p className="text-gray-200 font-medium">{profile.bio}</p>
+              <div className="flex items-center justify-center sm:justify-start gap-1.5 text-gray-400 text-[11px]">
+                <Mail className="w-3.5 h-3.5" />
+                <span>{profile.email}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Switcher (Square Grid vs List Feed) */}
+        <div className="flex items-center justify-center border-b border-[#262626]">
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`flex items-center gap-2 py-3 px-6 text-xs font-bold tracking-wider uppercase border-t-2 transition-colors ${
+              viewMode === 'grid'
+                ? 'border-white text-white'
+                : 'border-transparent text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            <Grid className="w-4 h-4" /> GRID
+          </button>
+          <button
+            onClick={() => setViewMode('feed')}
+            className={`flex items-center gap-2 py-3 px-6 text-xs font-bold tracking-wider uppercase border-t-2 transition-colors ${
+              viewMode === 'feed'
+                ? 'border-white text-white'
+                : 'border-transparent text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            <List className="w-4 h-4" /> FEED
+          </button>
+        </div>
+
+        {/* Posts Content */}
+        {userPosts.length === 0 ? (
+          <div className="text-center py-16 px-4 bg-[#0a0a0a] border border-[#262626] rounded-2xl">
+            <Plus className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-white mb-1">No Posts Yet</h3>
+            <p className="text-xs text-gray-400 max-w-xs mx-auto mb-4">
+              When you share civic complaints, they will appear on your profile feed.
+            </p>
+            <Link
+              to="/create-post"
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold text-white bg-sky-500 hover:bg-sky-600 transition-colors"
+            >
+              Share Your First Post
+            </Link>
+          </div>
+        ) : viewMode === 'grid' ? (
+          /* Instagram 3-Column Square Grid Layout */
+          <div className="grid grid-cols-3 gap-1 sm:gap-2">
+            {userPosts.map((post) => (
+              <div
+                key={post._id}
+                className="relative aspect-square bg-[#121212] overflow-hidden group cursor-pointer border border-[#1e1e1e]"
+              >
+                {post.image ? (
+                  <img
+                    src={post.image}
+                    alt="Post"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                  />
+                ) : (
+                  <div className="w-full h-full p-3 flex items-center justify-center text-center text-xs text-gray-400 font-medium line-clamp-3 bg-[#161616]">
+                    {post.content}
                   </div>
                 )}
+
+                {/* Hover Overlay with Heart & Comment Count */}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white font-bold text-xs">
+                  <span className="flex items-center gap-1">
+                    <Heart className="w-4 h-4 fill-white" /> {post.likes || 0}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <MessageCircle className="w-4 h-4 fill-white" /> {post.comments?.length || 0}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeletePost(post._id);
+                    }}
+                    className="absolute top-2 right-2 p-1 text-rose-400 hover:text-rose-300"
+                    title="Delete"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-
-            {/* Logout Action */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition-all"
-            >
-              <FiLogOut className="w-4 h-4" />
-              Logout
-            </button>
+            ))}
           </div>
-        </div>
-
-        {/* Stats Breakdown Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="glass-card rounded-2xl p-5 border border-white/10 text-center">
-            <p className="text-xs font-semibold uppercase text-gray-400">Total Filed Complaints</p>
-            <p className="text-2xl font-black text-white mt-1">{userPosts.length}</p>
-          </div>
-          <div className="glass-card rounded-2xl p-5 border border-white/10 text-center">
-            <p className="text-xs font-semibold uppercase text-gray-400">Community Upvotes</p>
-            <p className="text-2xl font-black text-rose-400 mt-1">{totalUpvotes}</p>
-          </div>
-          <div className="glass-card rounded-2xl p-5 border border-white/10 text-center">
-            <p className="text-xs font-semibold uppercase text-gray-400">Successfully Resolved</p>
-            <p className="text-2xl font-black text-emerald-400 mt-1">{resolvedCount}</p>
-          </div>
-        </div>
-
-        {/* User Activity Section */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <FiUser className="text-indigo-400" />
-            My Reported Incidents
-          </h2>
-
-          {userPosts.length === 0 ? (
-            <div className="glass-card rounded-3xl p-12 text-center border border-white/10">
-              <SparklesIcon className="w-12 h-12 text-gray-500 mx-auto mb-3 opacity-50" />
-              <h3 className="text-lg font-bold text-white mb-1">No Reported Complaints Yet</h3>
-              <p className="text-xs text-gray-400 max-w-sm mx-auto mb-4">
-                You haven't submitted any civic complaints yet.
-              </p>
-              <button
-                onClick={() => navigate('/create-post')}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold text-white gradient-bg shadow-lg shadow-indigo-500/20"
-              >
-                File Your First Complaint
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {userPosts.map((post) => (
-                <motion.div
-                  key={post._id}
-                  layout
-                  className="glass-card glass-card-hover rounded-3xl p-6 border border-white/10 flex flex-col justify-between"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <span className="text-xs px-2.5 py-1 rounded-md bg-indigo-500/10 text-indigo-400 font-semibold border border-indigo-500/20">
-                        {post.category || 'General'}
-                      </span>
-                      <StatusBadge status={post.status} size="sm" />
+        ) : (
+          /* List Feed View */
+          <div className="space-y-6">
+            {userPosts.map((post) => (
+              <article key={post._id} className="ig-card overflow-hidden">
+                <div className="p-3 sm:p-4 flex items-center justify-between border-b border-[#1e1e1e]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-white uppercase border border-[#333]">
+                      {profile.name[0]}
                     </div>
-
-                    <p className="text-xs sm:text-sm text-gray-200 line-clamp-3">
-                      {post.content}
-                    </p>
-
-                    {post.image && (
-                      <div className="rounded-2xl overflow-hidden bg-slate-950/60 max-h-40">
-                        <img src={post.image} alt="Evidence" className="w-full h-40 object-cover" />
-                      </div>
-                    )}
+                    <div>
+                      <span className="font-bold text-xs text-white">{profile.name}</span>
+                      <p className="text-[10px] text-gray-400">
+                        {new Date(post.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                      </p>
+                    </div>
                   </div>
-
-                  <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-xs text-gray-400">
-                      <span className="flex items-center gap-1 text-rose-400">
-                        <FiHeart /> {post.likes || 0}
-                      </span>
-                      <span className="flex items-center gap-1 text-indigo-400">
-                        <FiMessageSquare /> {post.comments?.length || 0}
-                      </span>
-                    </div>
-
+                  <div className="flex items-center gap-2">
+                    <StatusBadge status={post.status} />
                     <button
                       onClick={() => handleDeletePost(post._id)}
-                      className="p-2 rounded-xl text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                      title="Delete post"
+                      className="text-gray-400 hover:text-rose-400 p-1"
                     >
-                      <FiTrash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
+                </div>
+
+                <div className="p-4 text-xs text-gray-200 leading-relaxed">
+                  {post.content}
+                </div>
+
+                {post.image && (
+                  <div className="bg-[#121212]">
+                    <img src={post.image} alt="Post" className="w-full max-h-96 object-cover" />
+                  </div>
+                )}
+
+                <div className="p-3 border-t border-[#1e1e1e] flex items-center justify-between text-xs text-gray-400">
+                  <span className="flex items-center gap-1.5 text-rose-400 font-semibold">
+                    <Heart className="w-4 h-4 fill-rose-500" /> {post.likes || 0} Upvotes
+                  </span>
+                  <span className="flex items-center gap-1.5 text-gray-400 font-semibold">
+                    <MessageCircle className="w-4 h-4" /> {post.comments?.length || 0} Comments
+                  </span>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

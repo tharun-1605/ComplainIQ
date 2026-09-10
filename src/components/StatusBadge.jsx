@@ -1,61 +1,42 @@
 import React from 'react';
-import { 
-  ClockIcon, 
-  ArrowPathIcon, 
-  CheckCircleIcon, 
-  XCircleIcon 
-} from '@heroicons/react/24/outline';
+import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { ClockIcon, ArrowPathIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 const statusConfig = {
   Pending: {
-    label: 'Pending Review',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/30',
-    text: 'text-amber-400',
-    dotBg: 'bg-amber-400',
+    label: 'Pending',
+    bg: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
     icon: ClockIcon
   },
   'In Progress': {
     label: 'In Progress',
-    bg: 'bg-indigo-500/10',
-    border: 'border-indigo-500/30',
-    text: 'text-indigo-400',
-    dotBg: 'bg-indigo-400',
+    bg: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
     icon: ArrowPathIcon
   },
   Resolved: {
     label: 'Resolved',
-    bg: 'bg-emerald-500/10',
-    border: 'border-emerald-500/30',
-    text: 'text-emerald-400',
-    dotBg: 'bg-emerald-400',
+    bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    icon: CheckCircleIcon
+  },
+  Completed: {
+    label: 'Resolved',
+    bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     icon: CheckCircleIcon
   },
   Rejected: {
     label: 'Rejected',
-    bg: 'bg-rose-500/10',
-    border: 'border-rose-500/30',
-    text: 'text-rose-400',
-    dotBg: 'bg-rose-400',
+    bg: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
     icon: XCircleIcon
   }
 };
 
-function StatusBadge({ status = 'Pending', size = 'md' }) {
+function StatusBadge({ status = 'Pending', size = 'sm' }) {
   const config = statusConfig[status] || statusConfig.Pending;
   const IconComponent = config.icon;
 
-  const sizeClasses = size === 'sm' 
-    ? 'px-2.5 py-1 text-xs gap-1.5' 
-    : 'px-3 py-1.5 text-xs font-semibold gap-2';
-
   return (
-    <span className={`inline-flex items-center rounded-full border backdrop-blur-md transition-all ${config.bg} ${config.border} ${config.text} ${sizeClasses}`}>
-      <span className={`relative flex h-2 w-2`}>
-        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${config.dotBg} opacity-75`}></span>
-        <span className={`relative inline-flex rounded-full h-2 w-2 ${config.dotBg}`}></span>
-      </span>
-      <IconComponent className="w-3.5 h-3.5" />
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[11px] font-medium tracking-tight ${config.bg}`}>
+      <IconComponent className="w-3 h-3" />
       <span>{config.label}</span>
     </span>
   );

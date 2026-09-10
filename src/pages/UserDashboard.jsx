@@ -4,33 +4,43 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import StatusBadge from '../components/StatusBadge';
 import { API_BASE_URL } from '../services/api';
-import {
-  HeartIcon,
-  ChatBubbleLeftIcon,
-  PlusIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-  SparklesIcon,
-  ShareIcon,
-  FunnelIcon
-} from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import { 
+  Heart, 
+  MessageCircle, 
+  Send, 
+  Bookmark, 
+  MoreHorizontal, 
+  Sparkles, 
+  CheckCircle, 
+  X, 
+  MapPin,
+  Share2
+} from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
-const CATEGORIES = ['All', 'Infrastructure', 'Water Supply', 'Electricity', 'Sanitation', 'Public Safety'];
+const STORIES = [
+  { id: 'All', name: 'All Issues', emoji: '🏛️' },
+  { id: 'Electric', name: 'Electricity', emoji: '⚡' },
+  { id: 'Water', name: 'Water', emoji: '💧' },
+  { id: 'Drainage', name: 'Sanitation', emoji: '🧹' },
+  { id: 'Social Problem', name: 'Public Safety', emoji: '🛡️' },
+  { id: 'Air', name: 'Environment', emoji: '🌿' },
+  { id: 'Others', name: 'General', emoji: '📌' },
+];
 
 function UserDashboard() {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);  
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
   const [showComments, setShowComments] = useState({});
   const [likedComments, setLikedComments] = useState({});
-  const [zoomImage, setZoomImage] = useState(null);
+  const [savedPosts, setSavedPosts] = useState({});
+  const [doubleTapHeart, setDoubleTapHeart] = useState({});
   const [newComment, setNewComment] = useState({});
 
   useEffect(() => {
-    document.title = "Civic Feed | ComplainIQ";
+    document.title = "ComplainIQ • Instagram Feed";
     const fetchPosts = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -42,7 +52,7 @@ function UserDashboard() {
         const response = await fetch(`${API_BASE_URL}/user/posts`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error('Failed to fetch public complaints.');
+        if (!response.ok) throw new Error('Failed to fetch complaints.');
         const fetchedData = await response.json();
         setPosts(fetchedData.reverse());
       } catch (err) {
@@ -60,7 +70,7 @@ function UserDashboard() {
         method: 'POST',
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
-      if (!response.ok) throw new Error('Failed to update like status');
+      if (!response.ok) throw new Error('Failed to update upvote');
       const updatedPost = await response.json();
       setPosts(
         posts.map((post) =>
@@ -71,6 +81,18 @@ function UserDashboard() {
       );
     } catch (error) {
       console.error(error.message);
+    }
+  };
+
+  const handleDoubleTap = (postId) => {
+    setDoubleTapHeart((prev) => ({ ...prev, [postId]: true }));
+    setTimeout(() => {
+      setDoubleTapHeart((prev) => ({ ...prev, [postId]: false }));
+    }, 800);
+
+    const post = posts.find(p => p._id === postId);
+    if (post && !post.isLiked) {
+      handleLike(postId);
     }
   };
 
@@ -100,347 +122,292 @@ function UserDashboard() {
     }
   };
 
-  const toggleComments = (postId) => {
-    setShowComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
+  const toggleBookmark = (postId) => {
+    setSavedPosts(prev => {
+      const isSaved = !prev[postId];
+      toast.success(isSaved ? 'Saved to bookmarks' : 'Removed from bookmarks');
+      return { ...prev, [postId]: isSaved };
+    });
   };
 
-  const toggleCommentLike = (commentId) => {
-    setLikedComments((prev) => ({
-      ...prev,
-      [commentId]: !prev[commentId],
-    }));
+  const handleShare = (post) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Complaint link copied to clipboard!');
+    }
   };
 
-  // Filter posts based on search & selected category
+  // Filter posts based on story selection
   const filteredPosts = posts.filter((post) => {
-    const matchesSearch = (post.content || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (post.category || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (post.user?.name || '').toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesCategory = selectedCategory === 'All' || 
-      (post.category && post.category.toLowerCase().includes(selectedCategory.toLowerCase()));
-
-    return matchesSearch && matchesCategory;
+    if (selectedCategory === 'All') return true;
+    return post.category && post.category.toLowerCase().includes(selectedCategory.toLowerCase());
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-black text-white flex flex-col selection:bg-rose-500 selection:text-white pb-16 md:pb-8">
       <Navbar />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
+      <main className="flex-1 max-w-lg w-full mx-auto px-0 sm:px-4 py-4 space-y-6">
         
-        {/* Header & Quick Action */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
-              Public Complaints Feed
-              <span className="text-xs px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-semibold">
-                Live Governance
-              </span>
-            </h1>
-            <p className="text-sm text-slate-400 mt-1">
-              Explore civic issues reported by citizens and track official resolution statuses
-            </p>
-          </div>
-
-          <Link
-            to="/create-post"
-            className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold text-white gradient-bg hover:opacity-95 shadow-lg shadow-indigo-500/25 transition-all hover:scale-105"
-          >
-            <PlusIcon className="w-5 h-5" />
-            File New Complaint
-          </Link>
-        </div>
-
-        {/* Filter Controls Bar */}
-        <div className="glass-card rounded-2xl p-4 mb-8 border border-white/10 space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            {/* Search Input */}
-            <div className="relative flex-1">
-              <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3.5 top-3.5" />
-              <input
-                type="text"
-                placeholder="Search complaints by keyword, category, or submitter..."
-                className="w-full pl-11 pr-10 py-3 glass-input rounded-xl text-sm"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-3.5 text-gray-400 hover:text-white"
-                >
-                  <XMarkIcon className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Category Chips */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-custom">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1 mr-2">
-              <FunnelIcon className="w-3.5 h-3.5" /> Filter:
-            </span>
-            {CATEGORIES.map((cat) => (
+        {/* Instagram Story Highlights Category Bar */}
+        <div className="bg-black sm:bg-[#0a0a0a] sm:border border-[#262626] sm:rounded-2xl p-3 flex items-center gap-4 overflow-x-auto scrollbar-custom border-b border-[#262626] sm:border-b">
+          {STORIES.map((story) => {
+            const isSelected = selectedCategory === story.id;
+            return (
               <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedCategory === cat
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30'
-                    : 'bg-slate-900/60 text-gray-300 hover:bg-slate-800 hover:text-white border border-white/5'
-                }`}
+                key={story.id}
+                onClick={() => setSelectedCategory(story.id)}
+                className="flex flex-col items-center gap-1.5 flex-shrink-0 group focus:outline-none"
               >
-                {cat}
+                <div className={isSelected ? 'story-ring' : 'story-ring-gray transition-colors group-hover:bg-[#363636]'}>
+                  <div className="w-14 h-14 rounded-full bg-black flex items-center justify-center text-2xl border-2 border-black">
+                    {story.emoji}
+                  </div>
+                </div>
+                <span className={`text-[11px] tracking-tight font-medium max-w-[64px] truncate ${isSelected ? 'text-white font-bold' : 'text-gray-400'}`}>
+                  {story.name}
+                </span>
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
 
-        {/* Error Banner */}
+        {/* Error Notification */}
         {error && (
-          <div className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4 mb-6 text-center text-rose-300 text-sm font-medium">
+          <div className="mx-4 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs text-center font-medium">
             {error}
           </div>
         )}
 
-        {/* Feed Posts */}
+        {/* Instagram Feed Stream */}
         {loading ? (
-          <div className="space-y-6">
-            {[1, 2, 3].map((n) => (
-              <div key={n} className="glass-card rounded-2xl p-6 border border-white/10 animate-pulse space-y-4">
+          <div className="space-y-6 px-4">
+            {[1, 2].map((n) => (
+              <div key={n} className="bg-[#0a0a0a] border border-[#262626] rounded-2xl p-4 space-y-4 animate-pulse">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-800"></div>
-                  <div className="space-y-2 flex-1">
-                    <div className="h-4 bg-slate-800 rounded w-1/4"></div>
-                    <div className="h-3 bg-slate-800 rounded w-1/6"></div>
-                  </div>
+                  <div className="w-10 h-10 rounded-full bg-[#1e1e1e]"></div>
+                  <div className="h-4 bg-[#1e1e1e] rounded w-1/3"></div>
                 </div>
-                <div className="h-16 bg-slate-800 rounded-xl"></div>
+                <div className="h-80 bg-[#1e1e1e] rounded-xl"></div>
               </div>
             ))}
           </div>
         ) : filteredPosts.length === 0 ? (
-          <div className="text-center py-16 glass-card rounded-3xl border border-white/10 p-8">
-            <SparklesIcon className="w-12 h-12 text-gray-500 mx-auto mb-3 opacity-60" />
-            <h3 className="text-lg font-bold text-white mb-1">No Complaints Found</h3>
-            <p className="text-sm text-gray-400 max-w-md mx-auto mb-6">
-              {searchQuery || selectedCategory !== 'All' 
-                ? 'Try adjusting your search criteria or category filter.'
-                : 'Be the first citizen to file a public complaint in your area!'}
+          <div className="text-center py-16 px-4 bg-[#0a0a0a] border border-[#262626] rounded-2xl">
+            <Sparkles className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-white mb-1">No Posts in this Category</h3>
+            <p className="text-xs text-gray-400 max-w-xs mx-auto mb-6">
+              Be the first citizen to report an issue in this category.
             </p>
             <Link
               to="/create-post"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white gradient-bg"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-sky-500 hover:bg-sky-600 transition-colors"
             >
-              <PlusIcon className="w-4 h-4" />
-              File Complaint Now
+              Share Complaint
             </Link>
           </div>
         ) : (
-          <div className="space-y-6">
-            {filteredPosts.map((post) => (
-              <motion.article
-                key={post._id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="glass-card glass-card-hover rounded-3xl border border-white/10 overflow-hidden"
-              >
-                {/* Post Header */}
-                <div className="p-5 sm:p-6 flex items-start justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl gradient-bg flex items-center justify-center text-white font-bold text-lg shadow-md">
-                      {(post.user?.name || post.user?.username || 'U')[0].toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-white text-sm">{post.user?.name || post.user?.username || 'Anonymous Submitter'}</span>
-                        <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 font-medium border border-indigo-500/20">
-                          {post.category || 'General'}
-                        </span>
+          <div className="space-y-6 sm:space-y-8">
+            {filteredPosts.map((post) => {
+              const hasMedia = post.image || post.video;
+              const authorName = post.user?.name || post.user?.username || 'Citizen';
+
+              return (
+                <article
+                  key={post._id}
+                  className="ig-card overflow-hidden"
+                >
+                  {/* Card Header */}
+                  <div className="p-3 sm:p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="story-ring">
+                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-xs text-white border border-black uppercase">
+                          {authorName[0]}
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        Submitted on {new Date(post.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
-                      </p>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-xs text-white">{authorName}</span>
+                          <StatusBadge status={post.status} />
+                        </div>
+                        <p className="text-[11px] text-gray-400 font-medium">
+                          {new Date(post.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        </p>
+                      </div>
                     </div>
+
+                    <button className="text-gray-400 hover:text-white p-1">
+                      <MoreHorizontal className="w-5 h-5" />
+                    </button>
                   </div>
 
-                  <StatusBadge status={post.status} />
-                </div>
-
-                {/* Complaint Body */}
-                <div className="px-5 sm:px-6 pb-4">
-                  <p className="text-slate-200 text-sm sm:text-base leading-relaxed">
-                    {post.content}
-                  </p>
-                </div>
-
-                {/* Media Attachment */}
-                {(post.image || post.video) && (
-                  <div className="relative bg-slate-950/60 overflow-hidden cursor-pointer group">
-                    {post.image && (
-                      <div className="relative">
+                  {/* Media Aspect Ratio Container with Double-Tap Gesture */}
+                  {hasMedia ? (
+                    <div 
+                      className="relative bg-[#121212] overflow-hidden select-none"
+                      onDoubleClick={() => handleDoubleTap(post._id)}
+                    >
+                      {post.image && (
                         <img 
                           src={post.image} 
                           alt="Complaint Proof" 
-                          className="w-full max-h-96 object-cover transition-transform duration-500 group-hover:scale-105"
-                          onClick={() => setZoomImage(post.image)}
+                          className="w-full object-cover max-h-[500px]"
                         />
-                        <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <button
-                            onClick={() => setZoomImage(post.image)}
-                            className="px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white text-xs font-semibold border border-white/20"
-                          >
-                            Click to View Fullsize
-                          </button>
+                      )}
+                      {post.video && (
+                        <video controls className="w-full max-h-[500px] object-cover">
+                          <source src={post.video} type="video/mp4" />
+                        </video>
+                      )}
+
+                      {/* Double Tap Animated Popping Heart Overlay */}
+                      <AnimatePresence>
+                        {doubleTapHeart[post._id] && (
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                            <Heart className="w-24 h-24 text-rose-500 fill-rose-500 animate-heart-pop drop-shadow-2xl" />
+                          </div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    <div className="px-4 py-6 bg-gradient-to-br from-[#121212] to-[#1a1a1a] border-y border-[#262626]">
+                      <p className="text-sm sm:text-base font-normal text-gray-100 leading-relaxed">
+                        {post.content}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Action Icons Row */}
+                  <div className="p-3 sm:p-4 pb-2">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-4">
+                        <button 
+                          onClick={() => handleLike(post._id)}
+                          className="focus:outline-none transition-transform active:scale-125"
+                        >
+                          <Heart 
+                            className={`w-6 h-6 ${post.isLiked ? 'text-rose-500 fill-rose-500' : 'text-white hover:text-gray-300'}`} 
+                          />
+                        </button>
+                        
+                        <button 
+                          onClick={() => setShowComments(prev => ({ ...prev, [post._id]: !prev[post._id] }))}
+                          className="focus:outline-none text-white hover:text-gray-300 transition-colors"
+                        >
+                          <MessageCircle className="w-6 h-6" />
+                        </button>
+
+                        <button 
+                          onClick={() => handleShare(post)}
+                          className="focus:outline-none text-white hover:text-gray-300 transition-colors"
+                        >
+                          <Share2 className="w-5 h-5" />
+                        </button>
+                      </div>
+
+                      <button 
+                        onClick={() => toggleBookmark(post._id)}
+                        className="focus:outline-none transition-colors"
+                      >
+                        <Bookmark 
+                          className={`w-6 h-6 ${savedPosts[post._id] ? 'text-white fill-white' : 'text-white hover:text-gray-300'}`} 
+                        />
+                      </button>
+                    </div>
+
+                    {/* Likes Social Proof */}
+                    <div className="mb-2">
+                      <span className="font-bold text-xs text-white">
+                        {post.likes || 0} upvotes
+                      </span>
+                    </div>
+
+                    {/* Caption Block (If image present, render content as caption) */}
+                    {hasMedia && (
+                      <div className="text-xs text-white mb-2 leading-relaxed">
+                        <span className="font-bold mr-2">{authorName}</span>
+                        <span className="text-gray-200">{post.content}</span>
+                        <div className="mt-1 text-sky-400 font-medium">
+                          #{post.category || 'CivicIssue'} #ComplainIQ
                         </div>
                       </div>
                     )}
-                    {post.video && (
-                      <video controls className="w-full max-h-96 object-cover">
-                        <source src={post.video} type="video/mp4" />
-                      </video>
+
+                    {/* Official Admin Reply Highlight */}
+                    {post.adminReply && (
+                      <div className="my-3 p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30">
+                        <div className="flex items-center gap-1.5 mb-1 text-[11px] font-bold text-emerald-400">
+                          <CheckCircle className="w-3.5 h-3.5" /> Official Resolution Response
+                        </div>
+                        <p className="text-xs text-emerald-100">
+                          {post.adminReply}
+                        </p>
+                      </div>
                     )}
-                  </div>
-                )}
 
-                {/* Admin Official Response (If Present) */}
-                {post.adminReply && (
-                  <div className="mx-5 sm:mx-6 my-4 p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/30">
-                    <div className="flex items-center gap-2 mb-1.5 text-xs font-bold text-indigo-400 uppercase tracking-wider">
-                      <SparklesIcon className="w-4 h-4" />
-                      Official Admin Resolution Response
-                    </div>
-                    <p className="text-xs sm:text-sm text-indigo-100">
-                      {post.adminReply}
-                    </p>
-                  </div>
-                )}
-
-                {/* Action Bar (Upvotes & Comments) */}
-                <div className="px-5 sm:px-6 py-4 border-t border-white/5 flex items-center justify-between bg-slate-900/40">
-                  <div className="flex items-center gap-3">
+                    {/* Comments Toggle Button */}
                     <button 
-                      onClick={() => handleLike(post._id)} 
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                        post.isLiked
-                          ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                          : 'bg-slate-800/80 text-gray-300 hover:text-white hover:bg-slate-800 border border-white/5'
-                      }`}
+                      onClick={() => setShowComments(prev => ({ ...prev, [post._id]: !prev[post._id] }))}
+                      className="text-xs text-gray-500 font-medium mb-2 block hover:underline"
                     >
-                      {post.isLiked ? (
-                        <HeartSolidIcon className="w-4 h-4 text-rose-500" />
-                      ) : (
-                        <HeartIcon className="w-4 h-4" />
-                      )}
-                      <span>{post.likes || 0} Upvotes</span>
+                      {post.comments?.length > 0 
+                        ? `View all ${post.comments.length} comments` 
+                        : 'Add a comment...'}
                     </button>
-                    
-                    <button 
-                      onClick={() => toggleComments(post._id)} 
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-slate-800/80 text-gray-300 hover:text-white hover:bg-slate-800 border border-white/5 transition-all"
-                    >
-                      <ChatBubbleLeftIcon className="w-4 h-4" />
-                      <span>{post.comments?.length || 0} Comments</span>
-                    </button>
-                  </div>
 
-                  <span className="text-xs text-gray-400 hidden sm:inline">
-                    ID: #{post._id ? post._id.slice(-6) : 'N/A'}
-                  </span>
-                </div>
-
-                {/* Comments Section Drawer */}
-                <AnimatePresence>
-                  {showComments[post._id] && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="border-t border-white/5 bg-slate-950/80 p-5 space-y-4"
-                    >
-                      {/* Comments List */}
-                      <div className="space-y-3 max-h-60 overflow-y-auto scrollbar-custom pr-1">
-                        {(!post.comments || post.comments.length === 0) ? (
-                          <p className="text-xs text-gray-400 italic text-center py-2">No citizen comments yet. Leave a thought below!</p>
-                        ) : (
-                          post.comments.map((comment) => (
-                            <div key={comment._id || Math.random()} className="p-3 rounded-xl bg-slate-900/60 border border-white/5">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="font-bold text-xs text-indigo-300">
+                    {/* Comments Drawer */}
+                    <AnimatePresence>
+                      {showComments[post._id] && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="space-y-2 mb-3 pt-2 border-t border-[#262626]"
+                        >
+                          {post.comments?.map((comment) => (
+                            <div key={comment._id || Math.random()} className="flex items-start justify-between text-xs py-1">
+                              <div>
+                                <span className="font-bold text-white mr-2">
                                   {comment.author?.username || comment.username || 'Citizen'}
                                 </span>
-                                <button
-                                  onClick={() => toggleCommentLike(comment._id)}
-                                  className="text-[10px] text-gray-400 hover:text-rose-400"
-                                >
-                                  {likedComments[comment._id] ? '❤️ Upvoted' : '🤍 Upvote'}
-                                </button>
+                                <span className="text-gray-300">{comment.text}</span>
                               </div>
-                              <p className="text-xs text-gray-200">{comment.text}</p>
                             </div>
-                          ))
-                        )}
-                      </div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
-                      {/* Comment Input */}
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          placeholder="Write a constructive comment..."
-                          className="flex-1 glass-input rounded-xl px-4 py-2 text-xs"
-                          value={newComment[post._id] || ''}
-                          onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              handleCommentSubmit(post._id, newComment[post._id]);
-                            }
-                          }}
-                        />
-                        <button
-                          onClick={() => handleCommentSubmit(post._id, newComment[post._id])}
-                          disabled={!newComment[post._id]?.trim()}
-                          className="px-4 py-2 rounded-xl text-xs font-bold text-white gradient-bg disabled:opacity-50"
-                        >
-                          Post
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.article>
-            ))}
+                    {/* Quick Inline Comment Input */}
+                    <div className="flex items-center gap-2 pt-2 border-t border-[#262626]">
+                      <input
+                        type="text"
+                        placeholder="Add a comment..."
+                        className="bg-transparent text-xs text-white placeholder-gray-500 outline-none flex-1 py-1"
+                        value={newComment[post._id] || ''}
+                        onChange={(e) => setNewComment({ ...newComment, [post._id]: e.target.value })}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleCommentSubmit(post._id, newComment[post._id]);
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={() => handleCommentSubmit(post._id, newComment[post._id])}
+                        disabled={!newComment[post._id]?.trim()}
+                        className="text-xs font-bold text-sky-500 hover:text-sky-400 disabled:opacity-40 transition-colors"
+                      >
+                        Post
+                      </button>
+                    </div>
+
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
       </main>
-
-      {/* Lightbox Image Zoom Modal */}
-      <AnimatePresence>
-        {zoomImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-50 flex items-center justify-center p-4"
-            onClick={() => setZoomImage(null)}
-          >
-            <div className="relative max-w-4xl max-h-[90vh] w-full flex items-center justify-center">
-              <button
-                onClick={() => setZoomImage(null)}
-                className="absolute top-4 right-4 p-3 rounded-full bg-slate-800/80 text-white hover:bg-slate-700 transition-colors z-10"
-              >
-                <XMarkIcon className="w-6 h-6" />
-              </button>
-              <img
-                src={zoomImage}
-                alt="Enlarged Proof"
-                className="max-h-[85vh] w-auto max-w-full rounded-2xl shadow-2xl object-contain"
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

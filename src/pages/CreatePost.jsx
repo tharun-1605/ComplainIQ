@@ -3,18 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUpload, FiMapPin, FiX, FiLoader, FiCheckCircle } from 'react-icons/fi';
 import Navbar from '../components/Navbar';
 import { API_BASE_URL } from '../services/api';
-import { SparklesIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { 
+  Image as ImageIcon, 
+  Video as VideoIcon, 
+  MapPin, 
+  X, 
+  Loader2, 
+  CheckCircle,
+  ArrowLeft,
+  Sparkles,
+  Send,
+  Plus
+} from 'lucide-react';
 
 const CATEGORY_OPTIONS = [
-  { label: 'Infrastructure', value: 'Electric', icon: '⚡' },
-  { label: 'Water Supply', value: 'Water', icon: '💧' },
-  { label: 'Sanitation', value: 'Drainage', icon: '🧹' },
-  { label: 'Public Safety', value: 'Social Problem', icon: '🛡️' },
-  { label: 'Environment', value: 'Air', icon: '🌿' },
-  { label: 'General / Other', value: 'Others', icon: '📌' },
+  { label: 'Electricity', value: 'Electric', emoji: '⚡' },
+  { label: 'Water Supply', value: 'Water', emoji: '💧' },
+  { label: 'Sanitation', value: 'Drainage', emoji: '🧹' },
+  { label: 'Public Safety', value: 'Social Problem', emoji: '🛡️' },
+  { label: 'Environment', value: 'Air', emoji: '🌿' },
+  { label: 'General / Other', value: 'Others', emoji: '📌' },
 ];
 
 function CreatePost() {
@@ -34,9 +44,10 @@ function CreatePost() {
   const [locationAddress, setLocationAddress] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
+  const [videoPreview, setVideoPreview] = useState(null);
 
   useEffect(() => {
-    document.title = "New Complaint | ComplainIQ";
+    document.title = "Create New Post • ComplainIQ";
   }, []);
 
   const reverseGeocode = async (lat, lng) => {
@@ -49,7 +60,7 @@ function CreatePost() {
       return address;
     } catch (error) {
       console.error('Reverse geocoding error:', error);
-      setLocationAddress("GPS Coordinates acquired (Address lookup unavailable)");
+      setLocationAddress("GPS Coordinates attached");
       return null;
     }
   };
@@ -69,11 +80,11 @@ function CreatePost() {
             longitude,
           }));
           await reverseGeocode(latitude, longitude);
-          toast.success('GPS Location pinned successfully!');
+          toast.success('GPS location attached');
           setLocationLoading(false);
         },
         (error) => {
-          let errorMessage = 'Failed to fetch location. Please check browser permissions.';
+          let errorMessage = 'Failed to fetch location. Check browser permissions.';
           toast.error(errorMessage);
           setLocationError(errorMessage);
           setLocationLoading(false);
@@ -101,12 +112,20 @@ function CreatePost() {
     }
   };
 
+  const handleVideoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData({ ...formData, video: file });
+      setVideoPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     if (!formData.content.trim()) {
-      toast.error('Please describe the complaint issue');
+      toast.error('Please add a caption describing the issue');
       setIsSubmitting(false);
       return;
     }
@@ -144,116 +163,123 @@ function CreatePost() {
         },
       });
 
-      toast.success('Complaint submitted successfully!');
+      toast.success('Complaint posted to feed!');
       navigate('/user-dashboard');
     } catch (error) {
       console.error('Submission error:', error);
-      toast.error('Failed to post complaint. Please check connection.');
+      toast.error('Failed to post complaint. Check backend connection.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white flex flex-col">
+    <div className="min-h-screen bg-black text-white flex flex-col selection:bg-rose-500 selection:text-white pb-16 md:pb-8">
       <Navbar />
 
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-8">
+      <main className="flex-1 max-w-lg w-full mx-auto px-0 sm:px-4 py-4 space-y-4">
         
-        {/* Back Link & Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <button
-            onClick={() => navigate('/user-dashboard')}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-white transition-colors"
-          >
-            <ArrowLeftIcon className="w-4 h-4" />
-            Back to Feed
-          </button>
-          <span className="text-xs px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono">
-            Public Incident Report
-          </span>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card rounded-3xl p-6 sm:p-10 border border-white/10 shadow-2xl backdrop-blur-2xl"
-        >
-          <div className="text-center mb-8">
-            <div className="w-12 h-12 rounded-2xl gradient-bg mx-auto flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-3">
-              <SparklesIcon className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">File a Public Complaint</h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-1">
-              Provide incident details to notify city administration & track public progress
-            </p>
+        {/* Composer Card Header */}
+        <div className="bg-[#0a0a0a] border border-[#262626] sm:rounded-2xl overflow-hidden shadow-2xl">
+          
+          {/* Top Bar */}
+          <div className="px-4 py-3 border-b border-[#262626] flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => navigate('/user-dashboard')}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h1 className="text-sm font-bold text-white tracking-tight">Create new post</h1>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="text-xs font-bold text-sky-500 hover:text-sky-400 disabled:opacity-50 transition-colors"
+            >
+              {isSubmitting ? 'Sharing...' : 'Share'}
+            </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="p-4 space-y-5">
             
-            {/* Title (Optional) */}
+            {/* Category Select Pills */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">
-                Subject Title <span className="text-gray-500 font-normal lowercase">(optional)</span>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">
+                Category
               </label>
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-custom pb-1">
+                {CATEGORY_OPTIONS.map((cat) => {
+                  const isSelected = formData.category === cat.value;
+                  return (
+                    <button
+                      key={cat.value}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, category: cat.value })}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold flex-shrink-0 transition-all ${
+                        isSelected
+                          ? 'bg-white text-black font-bold shadow-md'
+                          : 'bg-[#1e1e1e] text-gray-300 hover:bg-[#2a2a2a]'
+                      }`}
+                    >
+                      <span>{cat.emoji}</span>
+                      <span>{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Optional Title */}
+            <div>
               <input
                 type="text"
-                className="w-full px-4 py-3 glass-input rounded-xl text-sm"
-                placeholder="e.g. Broken Water Main on 5th Avenue"
+                className="w-full px-3 py-2 bg-[#121212] border border-[#262626] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors"
+                placeholder="Title / Summary (e.g. Water leak on main street)"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               />
             </div>
 
-            {/* Category Selection Grid */}
+            {/* Caption Textarea */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">
-                Incident Category <span className="text-rose-400">*</span>
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                {CATEGORY_OPTIONS.map((cat) => (
-                  <button
-                    key={cat.value}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, category: cat.value })}
-                    className={`flex items-center gap-2 p-3 rounded-2xl border text-xs font-semibold transition-all ${
-                      formData.category === cat.value
-                        ? 'bg-indigo-600/30 border-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-                        : 'bg-slate-900/60 border-white/5 text-gray-400 hover:text-white hover:bg-slate-850'
-                    }`}
-                  >
-                    <span>{cat.icon}</span>
-                    <span>{cat.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Content / Description */}
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">
-                Detailed Description <span className="text-rose-400">*</span>
-              </label>
               <textarea
                 rows={4}
-                className="w-full px-4 py-3 glass-input rounded-xl text-sm"
-                placeholder="Describe the problem, precise location markers, safety hazards, and impact..."
+                className="w-full p-3 bg-[#121212] border border-[#262626] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 transition-colors leading-relaxed"
+                placeholder="Write a caption... Describe the civic issue, location markers, and urgency #civic #fix"
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                 required
               />
             </div>
 
-            {/* Attachments Section */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Media Upload Area */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Photo Upload */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">
                   Photo Evidence
                 </label>
-                <div className="relative">
-                  <label className="flex items-center justify-center gap-2 p-4 rounded-xl glass-input border-dashed border-white/20 hover:border-indigo-500 cursor-pointer text-xs font-medium text-gray-300 transition-all">
-                    <FiUpload className="w-4 h-4 text-indigo-400" />
-                    <span>{formData.image ? formData.image.name : 'Attach Image'}</span>
+                {imagePreview ? (
+                  <div className="relative rounded-xl overflow-hidden bg-[#121212] border border-[#262626]">
+                    <img src={imagePreview} alt="Preview" className="w-full h-36 object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData({ ...formData, image: null });
+                        setImagePreview(null);
+                      }}
+                      className="absolute top-2 right-2 p-1.5 rounded-full bg-black/80 text-white hover:bg-black"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center h-36 rounded-xl bg-[#121212] border border-dashed border-[#363636] hover:border-gray-500 cursor-pointer transition-colors p-4">
+                    <ImageIcon className="w-6 h-6 text-gray-400 mb-1.5" />
+                    <span className="text-xs font-semibold text-gray-300">Add Photo</span>
+                    <span className="text-[10px] text-gray-500">JPG, PNG up to 10MB</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -261,100 +287,100 @@ function CreatePost() {
                       className="hidden"
                     />
                   </label>
-                  {imagePreview && (
-                    <div className="mt-2 relative rounded-xl overflow-hidden max-h-32">
-                      <img src={imagePreview} alt="Preview" className="w-full h-32 object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFormData({ ...formData, image: null });
-                          setImagePreview(null);
-                        }}
-                        className="absolute top-2 right-2 p-1 rounded-full bg-slate-900/80 text-rose-400"
-                      >
-                        <FiX />
-                      </button>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
 
+              {/* Video Upload */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">
-                  Video Clip <span className="text-gray-500 font-normal lowercase">(optional)</span>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">
+                  Video Clip <span className="text-gray-600 font-normal lowercase">(optional)</span>
                 </label>
-                <label className="flex items-center justify-center gap-2 p-4 rounded-xl glass-input border-dashed border-white/20 hover:border-indigo-500 cursor-pointer text-xs font-medium text-gray-300 transition-all">
-                  <FiUpload className="w-4 h-4 text-indigo-400" />
-                  <span>{formData.video ? formData.video.name : 'Attach Video MP4'}</span>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) setFormData({ ...formData, video: file });
-                    }}
-                    className="hidden"
-                  />
-                </label>
+                {videoPreview ? (
+                  <div className="relative rounded-xl overflow-hidden bg-[#121212] border border-[#262626]">
+                    <video controls className="w-full h-36 object-cover">
+                      <source src={videoPreview} type="video/mp4" />
+                    </video>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData({ ...formData, video: null });
+                        setVideoPreview(null);
+                      }}
+                      className="absolute top-2 right-2 p-1.5 rounded-full bg-black/80 text-white hover:bg-black"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center h-36 rounded-xl bg-[#121212] border border-dashed border-[#363636] hover:border-gray-500 cursor-pointer transition-colors p-4">
+                    <VideoIcon className="w-6 h-6 text-gray-400 mb-1.5" />
+                    <span className="text-xs font-semibold text-gray-300">Add Video</span>
+                    <span className="text-[10px] text-gray-500">MP4 format</span>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={handleVideoChange}
+                      className="hidden"
+                    />
+                  </label>
+                )}
               </div>
             </div>
 
-            {/* Geolocation Section */}
-            <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.useCurrentLocation}
-                    onChange={(e) => setFormData({ ...formData, useCurrentLocation: e.target.checked })}
-                    className="w-4 h-4 rounded bg-slate-800 border-white/20 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <FiMapPin className="text-indigo-400" /> Attach Current Geolocation (GPS)
-                  </span>
-                </label>
-              </div>
+            {/* Location Attachment */}
+            <div className="p-3 bg-[#121212] border border-[#262626] rounded-xl space-y-2">
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.useCurrentLocation}
+                  onChange={(e) => setFormData({ ...formData, useCurrentLocation: e.target.checked })}
+                  className="w-4 h-4 rounded bg-[#1e1e1e] border-[#363636] text-sky-500 focus:ring-0"
+                />
+                <span className="text-xs font-semibold text-gray-200 flex items-center gap-1.5">
+                  <MapPin className="w-4 h-4 text-rose-500" /> Tag Current GPS Location
+                </span>
+              </label>
 
               <AnimatePresence>
                 {locationLoading && (
-                  <p className="text-xs text-indigo-300 flex items-center gap-2">
-                    <FiLoader className="animate-spin" /> Acquiring precise GPS coordinates...
+                  <p className="text-[11px] text-sky-400 flex items-center gap-2 pt-1">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Acquiring satellite location...
                   </p>
                 )}
                 {locationAddress && !locationLoading && (
-                  <div className="flex items-start gap-2 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs">
-                    <FiCheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <div className="flex items-start gap-2 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px]">
+                    <CheckCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                     <span>{locationAddress}</span>
                   </div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Form Action Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+            {/* Action Buttons */}
+            <div className="pt-2 flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => navigate('/user-dashboard')}
-                className="px-5 py-3 rounded-xl text-xs font-bold text-gray-400 hover:text-white bg-slate-900 border border-white/10"
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-400 bg-[#1e1e1e] hover:bg-[#2a2a2a] transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-6 py-3 rounded-xl text-xs font-bold text-white gradient-bg shadow-lg shadow-indigo-500/25 disabled:opacity-50 flex items-center gap-2"
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white bg-sky-500 hover:bg-sky-600 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>
-                    <FiLoader className="animate-spin" /> Submitting Report...
+                    <Loader2 className="w-4 h-4 animate-spin" /> Publishing...
                   </>
                 ) : (
-                  'Submit Official Report'
+                  'Share Post'
                 )}
               </button>
             </div>
           </form>
-        </motion.div>
+        </div>
       </main>
     </div>
   );

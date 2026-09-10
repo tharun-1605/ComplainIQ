@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { API_BASE_URL } from '../services/api';
 import { 
   EnvelopeIcon, 
@@ -20,7 +20,7 @@ function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = "Login | ComplainIQ";
+    document.title = "Login • ComplainIQ";
   }, []);
 
   const handleInputChange = (e) => {
@@ -54,7 +54,7 @@ function Login() {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem('token', data.token);
-        toast.success(isAdmin ? 'Admin authenticated successfully!' : 'Welcome back!');
+        toast.success(isAdmin ? 'Admin authenticated!' : 'Welcome back!');
         navigate(isAdmin ? '/admin-dashboard' : '/user-dashboard');
       } else {
         toast.error(data.message || 'Invalid credentials');
@@ -67,67 +67,63 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center bg-slate-950 px-4 py-12 overflow-hidden selection:bg-indigo-500 selection:text-white">
-      {/* Background Animated Blobs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none animate-pulse delay-1000"></div>
-
+    <div className="min-h-screen relative flex items-center justify-center bg-black px-4 py-12 selection:bg-rose-500 selection:text-white">
+      
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md relative z-10"
+        className="w-full max-w-sm relative z-10"
       >
         {/* Main Card */}
-        <div className="glass-card rounded-3xl p-8 sm:p-10 border border-white/10 shadow-2xl backdrop-blur-2xl">
+        <div className="bg-[#0a0a0a] border border-[#262626] rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
           
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl gradient-bg shadow-lg shadow-indigo-500/30 mb-4">
-              <SparklesIcon className="w-8 h-8 text-white" />
+          <div className="text-center space-y-2">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-yellow-500 via-red-500 to-purple-600 mx-auto flex items-center justify-center text-white shadow-lg">
+              <SparklesIcon className="w-6 h-6" />
             </div>
-            <h2 data-testid="login-heading" className="text-3xl font-extrabold text-white tracking-tight">
-              Complain<span className="gradient-text">IQ</span>
+            <h2 data-testid="login-heading" className="text-2xl font-bold text-white tracking-tight font-sans">
+              Complain<span className="text-sky-500">IQ</span>
             </h2>
-            <p className="text-sm text-gray-400 mt-2 font-medium">
-              {isAdmin ? 'Administrator Management Portal' : 'Public Civic Complaint Portal'}
+            <p className="text-xs text-gray-400 font-medium">
+              {isAdmin ? 'Administrative Control Portal' : 'Civic Incident & Feed Portal'}
             </p>
           </div>
 
           {/* User vs Admin Role Switcher */}
-          <div className="grid grid-cols-2 p-1.5 mb-8 bg-slate-900/80 rounded-2xl border border-white/10 relative">
+          <div className="grid grid-cols-2 p-1 bg-[#121212] rounded-xl border border-[#262626]">
             <button
               type="button"
               data-testid="user-login-toggle"
               onClick={() => setIsAdmin(false)}
-              className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${
                 !isAdmin 
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25' 
+                  ? 'bg-[#262626] text-white' 
                   : 'text-gray-400 hover:text-white'
               }`}
             >
-              <UserIcon className="w-4 h-4" />
-              User Portal
+              <UserIcon className="w-3.5 h-3.5" />
+              Citizen
             </button>
             <button
               type="button"
               data-testid="admin-login-toggle"
               onClick={() => setIsAdmin(true)}
-              className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${
                 isAdmin 
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25' 
+                  ? 'bg-sky-600 text-white' 
                   : 'text-gray-400 hover:text-white'
               }`}
             >
-              <ShieldCheckIcon className="w-4 h-4" />
-              Admin Portal
+              <ShieldCheckIcon className="w-3.5 h-3.5" />
+              Admin
             </button>
           </div>
 
           {/* Form */}
-          <form data-testid="login-form" onSubmit={handleSubmit} className="space-y-5">
+          <form data-testid="login-form" onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">
                 Email Address
               </label>
               <div className="relative">
@@ -135,21 +131,21 @@ function Login() {
                   type="email"
                   name="email"
                   data-testid="login-email"
-                  className="w-full pl-11 pr-4 py-3.5 glass-input rounded-xl text-sm"
-                  placeholder="your@email.com"
+                  className="w-full pl-10 pr-3 py-2.5 bg-[#121212] border border-[#262626] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors"
+                  placeholder="name@example.com"
                   value={formData.email}
                   onChange={handleInputChange}
                   required
                 />
-                <EnvelopeIcon className="w-5 h-5 text-gray-400 absolute left-3.5 top-3.5" />
+                <EnvelopeIcon className="w-4 h-4 text-gray-500 absolute left-3 top-3" />
               </div>
               {errors.email && (
-                <p className="text-rose-400 text-xs mt-1.5 font-medium">{errors.email}</p>
+                <p className="text-rose-400 text-[11px] mt-1 font-medium">{errors.email}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -157,52 +153,48 @@ function Login() {
                   type="password"
                   name="password"
                   data-testid="login-password"
-                  className="w-full pl-11 pr-4 py-3.5 glass-input rounded-xl text-sm"
+                  className="w-full pl-10 pr-3 py-2.5 bg-[#121212] border border-[#262626] rounded-xl text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 transition-colors"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleInputChange}
                   required
                 />
-                <LockClosedIcon className="w-5 h-5 text-gray-400 absolute left-3.5 top-3.5" />
+                <LockClosedIcon className="w-4 h-4 text-gray-500 absolute left-3 top-3" />
               </div>
               {errors.password && (
-                <p className="text-rose-400 text-xs mt-1.5 font-medium">{errors.password}</p>
+                <p className="text-rose-400 text-[11px] mt-1 font-medium">{errors.password}</p>
               )}
             </div>
 
-            <motion.button
+            <button
               type="submit"
               data-testid="login-submit"
               disabled={isSubmitting}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className={`w-full py-4 rounded-xl font-bold text-sm text-white shadow-xl transition-all flex items-center justify-center gap-2 ${
+              className={`w-full py-3 rounded-xl font-bold text-xs text-white transition-all flex items-center justify-center gap-2 ${
                 isSubmitting 
-                  ? 'bg-gray-700 cursor-not-allowed' 
-                  : isAdmin 
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-indigo-500/25' 
-                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-500/25'
+                  ? 'bg-gray-800 cursor-not-allowed' 
+                  : 'bg-sky-500 hover:bg-sky-600'
               }`}
             >
               {isSubmitting ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Authenticating...
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Logging in...
                 </>
               ) : (
                 <>
-                  Sign In to Dashboard
-                  <ArrowRightIcon className="w-4 h-4" />
+                  Log In
+                  <ArrowRightIcon className="w-3.5 h-3.5" />
                 </>
               )}
-            </motion.button>
+            </button>
           </form>
 
-          {/* Footer Info */}
-          <div className="mt-8 pt-6 border-t border-white/10 text-center space-y-4">
-            <div className="bg-slate-900/60 rounded-2xl p-4 border border-white/10 space-y-2">
-              <p className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
-                ⚡ Quick Fill Demo Account
+          {/* Demo Fill Quick Options */}
+          <div className="pt-4 border-t border-[#262626] text-center space-y-3">
+            <div className="bg-[#121212] rounded-xl p-3 border border-[#262626] space-y-2">
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                ⚡ Quick Fill Demo Logins
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -211,9 +203,9 @@ function Login() {
                     setIsAdmin(false);
                     setFormData({ email: 'user1@gmail.com', password: '123456' });
                   }}
-                  className="py-2 px-3 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-xs font-bold border border-blue-500/30 transition-all flex items-center justify-center gap-1"
+                  className="py-1.5 px-2 rounded-lg bg-[#1e1e1e] hover:bg-[#2a2a2a] text-sky-400 text-xs font-semibold border border-[#333] transition-all"
                 >
-                  👤 Fill User
+                  👤 User
                 </button>
                 <button
                   type="button"
@@ -221,23 +213,21 @@ function Login() {
                     setIsAdmin(true);
                     setFormData({ email: 'admin@gmail.com', password: '123456' });
                   }}
-                  className="py-2 px-3 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-bold border border-purple-500/30 transition-all flex items-center justify-center gap-1"
+                  className="py-1.5 px-2 rounded-lg bg-[#1e1e1e] hover:bg-[#2a2a2a] text-purple-400 text-xs font-semibold border border-[#333] transition-all"
                 >
-                  🛡️ Fill Admin
+                  🛡️ Admin
                 </button>
               </div>
-              <p className="text-[11px] text-gray-400 font-mono pt-1">
-                Password for both: <span className="text-indigo-400 font-bold">123456</span>
-              </p>
             </div>
+
             <p className="text-xs text-gray-400">
               Don't have an account?{' '}
               <Link 
                 to="/register" 
                 data-testid="register-link"
-                className="text-indigo-400 font-semibold hover:text-indigo-300 hover:underline transition-colors"
+                className="text-sky-400 font-bold hover:underline"
               >
-                Register here
+                Sign up
               </Link>
             </p>
           </div>
@@ -249,3 +239,4 @@ function Login() {
 }
 
 export default Login;
+

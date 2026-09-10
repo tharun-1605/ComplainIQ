@@ -1,12 +1,20 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  PlusIcon, 
-  UserCircleIcon, 
-  ArrowRightOnRectangleIcon,
-  SparklesIcon,
-  CheckBadgeIcon
-} from '@heroicons/react/24/outline';
+  HomeIcon as HomeOutline,
+  PlusSquareIcon as PlusOutline,
+  UserIcon as UserOutline,
+  CheckCircleIcon as CheckOutline,
+  SearchIcon,
+  LogOutIcon,
+  Sparkles
+} from 'lucide-react';
+import { 
+  HomeIcon as HomeSolid,
+  PlusSquareIcon as PlusSolid,
+  UserIcon as UserSolid,
+  CheckCircleIcon as CheckSolid
+} from 'lucide-react';
 
 function Navbar() {
   const location = useLocation();
@@ -21,89 +29,95 @@ function Navbar() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 w-full glass-panel border-b border-white/10 shadow-2xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        
-        {/* Brand Logo */}
-        <Link to={token ? "/user-dashboard" : "/"} className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
-            <SparklesIcon className="w-6 h-6 text-white" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xl font-bold tracking-tight text-white flex items-center gap-1">
-              Complain<span className="gradient-text">IQ</span>
+    <>
+      {/* Top Desktop & Mobile Header */}
+      <header className="sticky top-0 z-40 w-full bg-black/90 backdrop-blur-md border-b border-[#262626]">
+        <div className="max-w-5xl mx-auto px-4 h-15 flex items-center justify-between py-3">
+          
+          {/* Brand Logo */}
+          <Link to={token ? "/user-dashboard" : "/"} className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-yellow-500 via-red-500 to-purple-600 flex items-center justify-center text-white shadow-md">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-white font-sans">
+              Complain<span className="text-sky-500">IQ</span>
             </span>
-            <span className="text-[10px] text-gray-400 font-medium tracking-wider uppercase">Civic Governance</span>
-          </div>
-        </Link>
+          </Link>
 
-        {/* Navigation Links */}
-        {token && (
-          <nav className="hidden md:flex items-center gap-1 bg-slate-900/60 p-1.5 rounded-full border border-white/10">
-            <Link
-              to="/user-dashboard"
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                isActive('/user-dashboard')
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30'
-                  : 'text-gray-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              Feed
-            </Link>
-            <Link
-              to="/completed-complaints"
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                isActive('/completed-complaints')
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30'
-                  : 'text-gray-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <CheckBadgeIcon className="w-3.5 h-3.5" />
-              Resolved
-            </Link>
-            <Link
-              to="/profile"
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                isActive('/profile')
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30'
-                  : 'text-gray-300 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              My Profile
-            </Link>
-          </nav>
-        )}
+          {/* Search Input (Desktop) */}
+          {token && (
+            <div className="hidden md:flex items-center gap-2 bg-[#121212] border border-[#262626] rounded-xl px-3 py-1.5 w-64">
+              <SearchIcon className="w-4 h-4 text-gray-500" />
+              <input 
+                type="text" 
+                placeholder="Search civic feed..." 
+                className="bg-transparent text-xs text-white placeholder-gray-500 outline-none w-full"
+              />
+            </div>
+          )}
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-3">
+          {/* Desktop Right Nav Links */}
           {token ? (
-            <>
-              <Link
-                to="/create-post"
-                className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white gradient-bg hover:opacity-90 shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 active:scale-95"
-              >
-                <PlusIcon className="w-4 h-4" />
-                New Complaint
+            <div className="hidden md:flex items-center gap-5">
+              <Link to="/user-dashboard" title="Feed" className="text-white hover:opacity-80 transition-opacity">
+                {isActive('/user-dashboard') ? <HomeSolid className="w-6 h-6 text-white" /> : <HomeOutline className="w-6 h-6 text-gray-300" />}
               </Link>
-              <button
-                onClick={handleLogout}
-                title="Logout"
-                className="p-2 rounded-xl bg-slate-800/80 hover:bg-rose-500/20 text-gray-300 hover:text-rose-400 border border-white/10 transition-colors"
+              <Link to="/create-post" title="New Complaint" className="text-white hover:opacity-80 transition-opacity">
+                {isActive('/create-post') ? <PlusSolid className="w-6 h-6 text-white" /> : <PlusOutline className="w-6 h-6 text-gray-300" />}
+              </Link>
+              <Link to="/completed-complaints" title="Resolved" className="text-white hover:opacity-80 transition-opacity">
+                {isActive('/completed-complaints') ? <CheckSolid className="w-6 h-6 text-emerald-400" /> : <CheckOutline className="w-6 h-6 text-gray-300" />}
+              </Link>
+              <Link to="/profile" title="Profile" className="text-white hover:opacity-80 transition-opacity">
+                {isActive('/profile') ? <UserSolid className="w-6 h-6 text-white" /> : <UserOutline className="w-6 h-6 text-gray-300" />}
+              </Link>
+              <button 
+                onClick={handleLogout} 
+                title="Logout" 
+                className="text-gray-400 hover:text-red-400 transition-colors pl-2 border-l border-[#262626]"
               >
-                <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                <LogOutIcon className="w-5 h-5" />
               </button>
-            </>
+            </div>
           ) : (
             <Link
               to="/"
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/30 transition-all"
+              className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white bg-sky-500 hover:bg-sky-600 transition-colors"
             >
-              Sign In
+              Log In
             </Link>
           )}
+
+          {/* Mobile Right Quick Logout Action */}
+          {token && (
+            <button 
+              onClick={handleLogout} 
+              className="md:hidden text-gray-400 hover:text-red-400 transition-colors"
+            >
+              <LogOutIcon className="w-5 h-5" />
+            </button>
+          )}
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Bottom Mobile Navigation Bar (Instagram Native App Navigation) */}
+      {token && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-black/95 backdrop-blur-lg border-t border-[#262626] px-6 py-3 flex items-center justify-between">
+          <Link to="/user-dashboard" className="text-white">
+            {isActive('/user-dashboard') ? <HomeSolid className="w-6 h-6 text-white" /> : <HomeOutline className="w-6 h-6 text-gray-400" />}
+          </Link>
+          <Link to="/completed-complaints" className="text-white">
+            {isActive('/completed-complaints') ? <CheckSolid className="w-6 h-6 text-emerald-400" /> : <CheckOutline className="w-6 h-6 text-gray-400" />}
+          </Link>
+          <Link to="/create-post" className="text-white">
+            {isActive('/create-post') ? <PlusSolid className="w-7 h-7 text-sky-500" /> : <PlusOutline className="w-7 h-7 text-gray-300" />}
+          </Link>
+          <Link to="/profile" className="text-white">
+            {isActive('/profile') ? <UserSolid className="w-6 h-6 text-white" /> : <UserOutline className="w-6 h-6 text-gray-400" />}
+          </Link>
+        </div>
+      )}
+    </>
   );
 }
 
