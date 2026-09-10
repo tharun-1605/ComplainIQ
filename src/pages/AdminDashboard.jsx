@@ -21,7 +21,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import StatusBadge from '../components/StatusBadge';
 import { API_BASE_URL } from '../services/api';
 
-mapboxgl.accessToken = 'pk.eyJ1IjoidGhhcnVuLTE2MDUwODA1IiwiYSI6ImNtOW1kYmd2ZTBhZTgyanM4ejRtMjQwa2UifQ.m9ey6l9q5bRWa4GwPneNwA';
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || '';
 
 function StatCard({ icon, title, value, gradient, shadow }) {
   return (
